@@ -1,0 +1,17 @@
+# Arquivos de desenvolvimento local
+serve.rb
+serve.py
+
+# Claude Code
+.claude/
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Editor
+.vscode/
+.idea/
+
+# Logs
+*.log
