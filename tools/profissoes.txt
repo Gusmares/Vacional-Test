@@ -1,0 +1,288 @@
+# Curadoria das profissões em português
+# Formato: código O*NET | nome | área | o que faz | formação no Brasil (opcional)
+# Sem formação escrita, o script usa a "Job Zone" do O*NET:
+#   5 = graduação + pós ou residência, 4 = graduação, 3 = técnico ou tecnólogo,
+#   2 = ensino médio + curso profissionalizante, 1 = sem exigência formal.
+# Para atualizar a base, veja o README (node tools/gerar-profissoes.js).
+
+# ---------- Tecnologia ----------
+15-1252|Desenvolvedor(a) de software|Tecnologia|Cria e mantém programas, aplicativos e sistemas.|Graduação em Ciência da Computação, Sistemas de Informação ou tecnólogo. Muita gente entra por cursos livres e portfólio.
+15-1254|Desenvolvedor(a) web|Tecnologia|Constrói sites e aplicações que rodam no navegador.|Tecnólogo, graduação ou cursos livres com portfólio
+15-1255|Designer de interfaces (UX/UI)|Tecnologia|Desenha como aplicativos e sites funcionam e parecem para quem usa.|Graduação em Design, Sistemas de Informação ou cursos livres
+15-1255.01|Designer de jogos digitais|Tecnologia|Cria regras, fases e a experiência de jogos eletrônicos.|Tecnólogo ou graduação em Jogos Digitais, Design ou Computação
+15-1253|Analista de testes de software (QA)|Tecnologia|Procura falhas em sistemas antes de eles chegarem ao usuário.
+15-1212|Analista de segurança da informação|Tecnologia|Protege sistemas e dados contra invasões e vazamentos.
+15-1299.04|Especialista em testes de invasão|Tecnologia|Simula ataques para descobrir brechas de segurança em sistemas.
+15-1211|Analista de sistemas|Tecnologia|Entende a necessidade de uma empresa e traduz em soluções de tecnologia.
+15-1232|Suporte técnico de TI|Tecnologia|Resolve problemas de computadores, redes e programas para usuários.|Curso técnico em Informática ou tecnólogo
+15-1244|Administrador(a) de redes e sistemas|Tecnologia|Mantém servidores e redes de uma empresa funcionando e seguros.
+15-1242|Administrador(a) de banco de dados|Tecnologia|Cuida do armazenamento, desempenho e segurança dos dados de uma empresa.
+15-2051|Cientista de dados|Tecnologia|Usa estatística e programação para achar respostas e prever resultados com dados.|Graduação em Computação, Estatística, Matemática ou Engenharia, com pós
+15-2051.01|Analista de Business Intelligence (BI)|Tecnologia|Transforma dados em painéis e relatórios para apoiar decisões.
+15-1221|Pesquisador(a) de computação e inteligência artificial|Tecnologia|Desenvolve novas técnicas de computação, como aprendizado de máquina.
+15-1299.09|Gerente de projetos de TI|Tecnologia|Coordena equipes, prazos e entregas de projetos de tecnologia.
+17-2061|Engenheiro(a) de computação|Tecnologia|Projeta computadores, circuitos e sistemas que unem hardware e software.
+
+# ---------- Engenharia e arquitetura ----------
+17-2051|Engenheiro(a) civil|Engenharia e arquitetura|Projeta e acompanha obras como prédios, pontes, estradas e saneamento.
+17-2071|Engenheiro(a) eletricista|Engenharia e arquitetura|Projeta sistemas de geração, distribuição e uso de energia elétrica.
+17-2072|Engenheiro(a) eletrônico|Engenharia e arquitetura|Projeta circuitos e equipamentos eletrônicos e de telecomunicações.
+17-2141|Engenheiro(a) mecânico|Engenharia e arquitetura|Projeta e melhora máquinas, motores e sistemas mecânicos.
+17-2112|Engenheiro(a) de produção|Engenharia e arquitetura|Melhora processos, custos e qualidade de fábricas e serviços.
+17-2041|Engenheiro(a) químico|Engenharia e arquitetura|Cria e otimiza processos que transformam matérias-primas em produtos.
+17-2081|Engenheiro(a) ambiental|Engenharia e arquitetura|Projeta soluções para tratar água, resíduos e reduzir impacto ambiental.
+17-2011|Engenheiro(a) aeroespacial|Engenharia e arquitetura|Projeta aviões, foguetes, satélites e seus sistemas.
+17-2171|Engenheiro(a) de petróleo|Engenharia e arquitetura|Planeja a extração de petróleo e gás.
+17-2151|Engenheiro(a) de minas|Engenharia e arquitetura|Planeja e acompanha a extração de minérios com segurança.
+17-2021|Engenheiro(a) agrícola|Engenharia e arquitetura|Aplica engenharia à produção rural: irrigação, máquinas e armazenagem.
+17-2031|Engenheiro(a) biomédico|Engenharia e arquitetura|Desenvolve equipamentos e tecnologias para a saúde.
+17-2111|Engenheiro(a) de segurança do trabalho|Engenharia e arquitetura|Previne acidentes e doenças no trabalho, e cuida das normas.|Engenharia ou Arquitetura + especialização em Segurança do Trabalho
+17-2199.05|Engenheiro(a) mecatrônico|Engenharia e arquitetura|Une mecânica, eletrônica e programação para criar sistemas automatizados.
+17-2199.08|Engenheiro(a) de robótica|Engenharia e arquitetura|Projeta e programa robôs e sistemas autônomos.
+17-2199.11|Engenheiro(a) de energia solar|Engenharia e arquitetura|Projeta sistemas de geração de energia solar.
+17-2131|Engenheiro(a) de materiais|Engenharia e arquitetura|Estuda e desenvolve materiais como metais, cerâmicas e polímeros.
+17-2121|Engenheiro(a) naval|Engenharia e arquitetura|Projeta navios, plataformas e embarcações.
+17-1011|Arquiteto(a) e urbanista|Engenharia e arquitetura|Projeta edifícios, casas e espaços, do desenho à obra.|Graduação em Arquitetura e Urbanismo (5 anos)
+17-1012|Paisagista|Engenharia e arquitetura|Projeta jardins, praças e áreas verdes.|Graduação em Arquitetura, Agronomia ou tecnólogo em Paisagismo
+17-1022|Agrimensor(a) e topógrafo(a)|Engenharia e arquitetura|Mede terrenos e faz mapeamentos para obras e registros.|Técnico em Agrimensura ou graduação em Engenharia Cartográfica
+17-3011|Desenhista projetista (CAD)|Engenharia e arquitetura|Transforma projetos em desenhos técnicos no computador.
+17-3022|Técnico(a) em edificações|Engenharia e arquitetura|Apoia projetos e acompanha a execução de obras civis.
+17-3023|Técnico(a) em eletrônica|Engenharia e arquitetura|Monta, testa e conserta circuitos e equipamentos eletrônicos.
+17-3024|Técnico(a) em mecatrônica|Engenharia e arquitetura|Monta e mantém sistemas que combinam mecânica, eletrônica e automação.
+17-3027|Técnico(a) em mecânica|Engenharia e arquitetura|Apoia projeto, montagem e manutenção de máquinas.
+
+# ---------- Ciências e pesquisa ----------
+19-1029.04|Biólogo(a)|Ciências e pesquisa|Estuda seres vivos, do micro ao ecossistema, em pesquisa, campo ou laboratório.
+19-1022|Microbiologista|Ciências e pesquisa|Estuda bactérias, fungos e vírus, em saúde, indústria ou pesquisa.
+19-1042|Pesquisador(a) biomédico(a)|Ciências e pesquisa|Pesquisa doenças e tratamentos em laboratórios e institutos.|Graduação em Biomedicina, Biologia ou área da saúde + mestrado e doutorado
+19-1041|Epidemiologista|Ciências e pesquisa|Estuda como as doenças se espalham e como prevenir.
+19-2031|Químico(a)|Ciências e pesquisa|Analisa e desenvolve substâncias, em indústria, laboratório ou pesquisa.
+19-2012|Físico(a)|Ciências e pesquisa|Pesquisa as leis da matéria, da energia e do universo.
+19-2041|Gestor(a) e cientista ambiental|Ciências e pesquisa|Avalia e reduz impactos ambientais de empresas e territórios.
+19-1032|Engenheiro(a) florestal|Ciências e pesquisa|Manejo e conservação de florestas e produção florestal.
+19-1013|Engenheiro(a) agrônomo(a)|Agro e meio ambiente|Melhora solo, plantio e produtividade de lavouras.|Graduação em Agronomia (5 anos)
+19-1011|Zootecnista|Agro e meio ambiente|Cuida da criação, nutrição e melhoramento de animais de produção.|Graduação em Zootecnia
+19-1012|Tecnólogo(a) e engenheiro(a) de alimentos|Ciências e pesquisa|Desenvolve e controla a qualidade de alimentos industrializados.
+19-2042|Geólogo(a)|Ciências e pesquisa|Estuda a terra: minerais, solo, água subterrânea e riscos geológicos.
+19-2021|Meteorologista|Ciências e pesquisa|Estuda o clima e faz previsão do tempo.
+19-3011|Economista|Ciências e pesquisa|Analisa mercados, políticas e dados econômicos.
+19-3033|Psicólogo(a) clínico(a)|Social e comunidade|Atende pessoas em psicoterapia e acompanhamento emocional.|Graduação em Psicologia (5 anos) + registro no CRP
+19-3032|Psicólogo(a) organizacional|Social e comunidade|Cuida de seleção, clima e desenvolvimento de pessoas nas empresas.|Graduação em Psicologia (5 anos) + registro no CRP
+19-3034|Psicólogo(a) escolar|Social e comunidade|Apoia alunos, famílias e escolas no desenvolvimento e na aprendizagem.|Graduação em Psicologia (5 anos) + registro no CRP
+19-3041|Sociólogo(a)|Ciências e pesquisa|Estuda a sociedade, grupos e relações sociais.
+19-3093|Historiador(a)|Ciências e pesquisa|Pesquisa e interpreta o passado a partir de fontes e documentos.
+19-3094|Cientista político(a)|Ciências e pesquisa|Analisa governos, políticas públicas e poder.
+19-3091|Antropólogo(a) e arqueólogo(a)|Ciências e pesquisa|Estuda culturas e vestígios de povos do presente e do passado.
+19-3092|Geógrafo(a)|Ciências e pesquisa|Estuda o espaço, o território e a relação entre sociedade e natureza.
+19-3051|Urbanista e planejador(a) urbano(a)|Ciências e pesquisa|Planeja o uso do solo e o desenvolvimento das cidades.
+19-4012|Técnico(a) agrícola|Agro e meio ambiente|Orienta o manejo de lavouras e criações no dia a dia.|Curso técnico em Agropecuária
+19-4092|Perito(a) criminal|Direito e segurança pública|Analisa vestígios e provas de crimes com técnicas científicas.|Graduação na área exigida pelo concurso (Química, Biologia, Computação, Engenharia etc.)
+19-5011|Especialista em saúde e segurança do trabalho|Engenharia e arquitetura|Avalia riscos e cuida da prevenção de acidentes nas empresas.
+19-5012|Técnico(a) em segurança do trabalho|Construção e manutenção|Fiscaliza condições de trabalho e orienta o uso de proteção.|Curso técnico em Segurança do Trabalho
+
+# ---------- Saúde ----------
+29-1216|Médico(a) clínico(a)|Saúde|Diagnostica e trata adultos, e encaminha para especialistas.|Medicina (6 anos) + residência
+29-1223|Psiquiatra|Saúde|Médico(a) que diagnostica e trata transtornos mentais.|Medicina (6 anos) + residência em Psiquiatria
+29-1221|Pediatra|Saúde|Médico(a) que cuida da saúde de crianças e adolescentes.|Medicina (6 anos) + residência em Pediatria
+29-1242|Cirurgião(ã) ortopedista|Saúde|Médico(a) que opera ossos, articulações e músculos.|Medicina (6 anos) + residência em Ortopedia
+29-1213|Dermatologista|Saúde|Médico(a) que trata a pele, cabelo e unhas.|Medicina (6 anos) + residência em Dermatologia
+29-1211|Anestesiologista|Saúde|Médico(a) que cuida da anestesia e da segurança do paciente na cirurgia.|Medicina (6 anos) + residência em Anestesiologia
+29-1021|Dentista|Saúde|Cuida da saúde da boca e dos dentes.|Odontologia (5 anos)
+29-1141|Enfermeiro(a)|Saúde|Cuida de pacientes, coordena equipes de enfermagem e processos de cuidado.|Graduação em Enfermagem (4 a 5 anos)
+29-1031|Nutricionista|Saúde|Orienta alimentação para saúde, esporte ou doenças.|Graduação em Nutrição
+29-1051|Farmacêutico(a)|Saúde|Cuida de medicamentos: dispensação, orientação e produção.|Graduação em Farmácia (5 anos)
+29-1123|Fisioterapeuta|Saúde|Reabilita movimentos e trata dores e lesões.|Graduação em Fisioterapia (5 anos)
+29-1122|Terapeuta ocupacional|Saúde|Ajuda pessoas a recuperar autonomia nas atividades do dia a dia.|Graduação em Terapia Ocupacional
+29-1127|Fonoaudiólogo(a)|Saúde|Trata fala, voz, audição e deglutição.|Graduação em Fonoaudiologia
+29-1131|Médico(a) veterinário(a)|Saúde|Cuida da saúde de animais de companhia, produção e silvestres.|Graduação em Medicina Veterinária (5 anos)
+29-1292|Técnico(a) em saúde bucal|Saúde|Auxilia dentistas e faz limpeza e prevenção.|Curso técnico em Saúde Bucal
+29-2061|Técnico(a) de enfermagem|Saúde|Presta cuidados diretos a pacientes sob supervisão do enfermeiro.|Curso técnico em Enfermagem
+29-2034|Técnico(a) em radiologia|Saúde|Opera equipamentos de imagem, como raio X e tomografia.|Curso técnico em Radiologia
+29-2012|Técnico(a) de laboratório clínico|Saúde|Realiza exames de sangue e outras análises.|Curso técnico em Análises Clínicas
+29-2043|Socorrista e técnico(a) em urgência|Saúde|Atende emergências no local e durante o transporte.|Curso técnico em Enfermagem ou Urgência + cursos de atendimento pré-hospitalar
+29-2055|Instrumentador(a) cirúrgico(a)|Saúde|Prepara e entrega instrumentos durante cirurgias.|Curso técnico em Instrumentação Cirúrgica
+29-2052|Técnico(a) em farmácia|Saúde|Auxilia no preparo, estoque e dispensação de medicamentos.|Curso técnico em Farmácia
+29-9091|Preparador(a) físico(a) e de reabilitação esportiva|Saúde|Prepara o corpo de atletas e acompanha a volta após lesões.|Graduação em Educação Física
+29-1128|Fisiologista do exercício|Saúde|Avalia e prescreve exercício para saúde, desempenho e reabilitação.|Graduação em Educação Física, com pós
+31-9011|Massoterapeuta|Saúde|Aplica massagens para relaxar e tratar dores.|Curso técnico ou livre em Massoterapia
+31-1122|Cuidador(a) de idosos|Saúde|Acompanha e cuida de idosos ou pessoas dependentes no dia a dia.|Curso de cuidador(a) de idosos
+11-9111|Gestor(a) de saúde|Saúde|Administra hospitais, clínicas e serviços de saúde.|Graduação em Administração, Gestão Hospitalar ou área da saúde
+
+# ---------- Negócios e finanças ----------
+13-2011|Contador(a) e auditor(a)|Negócios e finanças|Registra, analisa e confere as contas e os impostos de empresas.|Graduação em Ciências Contábeis + registro no CRC
+13-2051|Analista financeiro(a) e de investimentos|Negócios e finanças|Analisa empresas e mercados para orientar decisões de investimento.
+13-2052|Planejador(a) financeiro(a) pessoal|Negócios e finanças|Ajuda pessoas a organizar dinheiro, investir e planejar objetivos.
+13-2041|Analista de crédito|Negócios e finanças|Avalia risco para conceder crédito a pessoas e empresas.
+13-2054|Analista de risco financeiro|Negócios e finanças|Mede e controla riscos em bancos, seguradoras e empresas.
+13-2053|Subscritor(a) de seguros|Negócios e finanças|Decide quais riscos a seguradora aceita e por qual preço.
+13-2031|Analista de orçamento|Negócios e finanças|Planeja e acompanha o orçamento de empresas e órgãos públicos.
+13-2081|Auditor(a) fiscal|Negócios e finanças|Fiscaliza o cumprimento de impostos e tributos.|Graduação + concurso público
+13-1071|Analista de recursos humanos|Negócios e finanças|Cuida de seleção, contratação e relação com colaboradores.
+13-1151|Analista de treinamento e desenvolvimento|Negócios e finanças|Cria e aplica treinamentos para desenvolver equipes.
+13-1111|Consultor(a) de gestão|Negócios e finanças|Analisa empresas e propõe melhorias em processos e estratégia.
+13-1082|Gerente de projetos|Negócios e finanças|Organiza escopo, prazos, custos e equipe para entregar projetos.
+13-1081|Analista de logística|Negócios e finanças|Planeja transporte, estoque e entrega de produtos.
+13-1161|Analista de marketing e pesquisa de mercado|Vendas e comércio|Pesquisa consumidores e mercado para orientar produto e comunicação.
+13-1161.01|Especialista em tráfego pago e SEO|Vendas e comércio|Gerencia anúncios e otimiza sites para atrair clientes pela internet.|Sem exigência formal. Tecnólogo ou graduação em Marketing/Publicidade ajudam, e certificações das plataformas contam.
+13-1121|Organizador(a) de eventos|Vendas e comércio|Planeja e executa congressos, festas e feiras.|Tecnólogo em Eventos, graduação em Turismo, Publicidade ou Administração
+13-1023|Comprador(a)|Negócios e finanças|Negocia e compra insumos e produtos para empresas.
+13-1041|Analista de compliance|Negócios e finanças|Garante que a empresa siga leis, regras e normas internas.
+13-1031|Analista de sinistros|Negócios e finanças|Avalia e decide pedidos de indenização de seguros.
+13-1199.05|Especialista em sustentabilidade e ESG|Negócios e finanças|Planeja metas ambientais e sociais para empresas.
+13-1131|Captador(a) de recursos|Social e comunidade|Busca doações e patrocínios para projetos e ONGs.
+13-2099.04|Investigador(a) de fraudes|Negócios e finanças|Descobre e analisa fraudes financeiras.
+15-2011|Atuário(a)|Negócios e finanças|Calcula riscos e probabilidades para seguros, previdência e finanças.|Graduação em Ciências Atuariais, Matemática ou Estatística
+15-2041|Estatístico(a)|Ciências e pesquisa|Planeja pesquisas e analisa dados para responder perguntas.
+15-2021|Matemático(a)|Ciências e pesquisa|Cria e aplica modelos matemáticos em pesquisa e indústria.
+11-1021|Administrador(a) e gerente geral|Negócios e finanças|Coordena as áreas e as pessoas para a empresa funcionar e crescer.|Graduação em Administração ou outra, com experiência
+11-2021|Gerente de marketing|Vendas e comércio|Define a estratégia de marca, comunicação e campanhas.
+11-2022|Gerente de vendas|Vendas e comércio|Lidera equipes comerciais e metas de vendas.
+11-3121|Gerente de recursos humanos|Negócios e finanças|Lidera as políticas de pessoas da empresa.
+11-3031|Gerente financeiro(a)|Negócios e finanças|Coordena caixa, planejamento e resultados financeiros.
+11-3021|Gerente de tecnologia da informação|Tecnologia|Lidera equipes e a estratégia de TI de uma empresa.
+11-9021|Gerente de obras|Construção e manutenção|Coordena equipes, custos e prazos de uma obra.
+11-9051|Gerente de restaurante|Serviços, turismo e gastronomia|Cuida de equipe, cardápio, custo e atendimento de um restaurante.
+11-9081|Gerente de hotel|Serviços, turismo e gastronomia|Coordena hospedagem, atendimento e operação de hotéis.
+11-9013|Produtor(a) rural e gestor(a) agropecuário(a)|Agro e meio ambiente|Administra a produção e o negócio de fazendas e propriedades rurais.
+11-3071.04|Gerente de cadeia de suprimentos|Negócios e finanças|Coordena fornecedores, estoque e entrega ponta a ponta.
+11-9151|Gestor(a) de ONG e serviços sociais|Social e comunidade|Administra projetos e organizações sociais.
+13-1199.06|Empreendedor(a) de e-commerce|Vendas e comércio|Monta e gerencia uma loja online.|Sem exigência formal
+13-1011|Agente de artistas e atletas|Comunicação, arte e design|Negocia contratos e cuida da carreira de artistas e atletas.
+
+# ---------- Vendas e comércio ----------
+41-3031|Assessor(a) e corretor(a) de investimentos|Vendas e comércio|Orienta clientes e vende produtos de investimento.|Ensino médio ou superior + certificação (como CPA ou CEA)
+41-3021|Corretor(a) de seguros|Vendas e comércio|Vende e orienta clientes sobre seguros.|Curso técnico em Seguros + registro na Susep
+41-4012|Representante comercial|Vendas e comércio|Vende produtos de empresas para lojas e outras empresas.
+41-4011|Vendedor(a) técnico(a)|Vendas e comércio|Vende produtos técnicos explicando como funcionam.
+41-9031|Engenheiro(a) de vendas|Vendas e comércio|Une conhecimento técnico e venda de soluções complexas.
+41-3041|Agente de viagens|Serviços, turismo e gastronomia|Monta e vende pacotes e roteiros de viagem.
+41-9021|Corretor(a) de imóveis|Vendas e comércio|Intermedia a compra, venda e aluguel de imóveis.|Curso técnico em Transações Imobiliárias + registro no CRECI
+41-2031|Vendedor(a) de loja|Vendas e comércio|Atende clientes e vende produtos no varejo.
+43-4051|Atendente de relacionamento com o cliente|Vendas e comércio|Atende e resolve problemas de clientes por telefone, chat ou presencial.
+43-4171|Recepcionista|Vendas e comércio|Recebe e orienta visitantes e clientes.
+43-6014|Assistente administrativo(a)|Negócios e finanças|Organiza documentos, agendas e rotinas de escritório.
+43-3031|Auxiliar contábil e financeiro(a)|Negócios e finanças|Lança e confere contas, notas e pagamentos.
+43-3071|Caixa e atendente bancário(a)|Negócios e finanças|Atende clientes e faz operações em agências.
+43-5071|Auxiliar de estoque e almoxarifado|Transporte e logística|Recebe, confere, guarda e separa mercadorias.
+
+# ---------- Direito e segurança ----------
+23-1011|Advogado(a)|Direito e segurança pública|Aconselha e defende pessoas e empresas em questões jurídicas.|Graduação em Direito (5 anos) + exame da OAB
+23-1023|Juiz(a)|Direito e segurança pública|Julga processos e aplica a lei.|Direito + concurso público
+23-2011|Assistente jurídico(a)|Direito e segurança pública|Apoia advogados com pesquisa, documentos e prazos.
+23-1022|Mediador(a) e conciliador(a)|Direito e segurança pública|Ajuda as partes a resolverem conflitos sem ir a julgamento.
+33-3051|Policial|Direito e segurança pública|Faz patrulhamento, prevenção e atendimento de ocorrências.|Concurso público (militar ou civil), geralmente com ensino médio ou superior
+33-3021|Investigador(a) de polícia|Direito e segurança pública|Investiga crimes, coleta provas e identifica suspeitos.|Concurso público para a Polícia Civil
+33-3021.06|Analista de inteligência|Direito e segurança pública|Analisa informações para antecipar riscos e apoiar investigações.
+33-2011|Bombeiro(a)|Direito e segurança pública|Combate incêndios e faz salvamentos e resgates.|Concurso público para o Corpo de Bombeiros
+33-9032|Vigilante e segurança patrimonial|Direito e segurança pública|Protege pessoas, empresas e patrimônio.|Curso de formação de vigilante
+33-3012|Agente penitenciário(a)|Direito e segurança pública|Cuida da segurança e da rotina em unidades prisionais.|Concurso público
+
+# ---------- Educação ----------
+25-2021|Professor(a) dos anos iniciais|Educação|Alfabetiza e ensina crianças do ensino fundamental.|Graduação em Pedagogia
+25-2031|Professor(a) do ensino fundamental final e médio|Educação|Ensina uma disciplina para adolescentes.|Licenciatura na disciplina
+25-2011|Professor(a) de educação infantil|Educação|Cuida e educa crianças pequenas.|Graduação em Pedagogia
+25-2056|Professor(a) de educação especial|Educação|Ensina alunos com deficiência e adapta a aula para eles.|Graduação em Pedagogia ou licenciatura + especialização
+25-9031|Coordenador(a) pedagógico(a)|Educação|Apoia professores e a qualidade do ensino da escola.
+11-9032|Diretor(a) de escola|Educação|Lidera a gestão pedagógica e administrativa de uma escola.
+21-1012|Orientador(a) educacional e de carreira|Educação|Apoia estudantes em escolhas e dificuldades de estudo e carreira.
+25-3041|Professor(a) particular|Educação|Dá reforço e aulas individuais ou para pequenos grupos.
+25-3011|Professor(a) de idiomas|Educação|Ensina língua estrangeira ou português para estrangeiros.
+25-4022|Bibliotecário(a)|Educação|Organiza acervos e ajuda pessoas a encontrar informação.|Graduação em Biblioteconomia
+25-4012|Curador(a) de museus e acervos|Comunicação, arte e design|Pesquisa e organiza coleções e exposições.
+39-9031|Personal trainer e instrutor(a) de academia|Saúde|Orienta treinos e hábitos de atividade física.|Graduação em Educação Física + registro no CREF
+27-2022|Treinador(a) esportivo(a)|Educação|Prepara e orienta atletas e equipes.|Graduação em Educação Física, com cursos da modalidade
+
+# ---------- Social e comunidade ----------
+21-1021|Assistente social|Social e comunidade|Apoia famílias e comunidades no acesso a direitos e serviços.|Graduação em Serviço Social + registro no CRESS
+21-1091|Educador(a) em saúde|Social e comunidade|Ensina a população sobre prevenção e cuidados com a saúde.
+21-1094|Agente comunitário(a) de saúde|Social e comunidade|Visita famílias e liga a comunidade à unidade de saúde.|Ensino médio + curso de formação (concurso municipal)
+21-2011|Líder religioso(a)|Social e comunidade|Conduz uma comunidade religiosa, com acolhimento e ensino.|Formação própria de cada religião
+39-9032|Recreador(a) e animador(a)|Serviços, turismo e gastronomia|Organiza atividades de lazer para crianças, turistas e eventos.
+
+# ---------- Comunicação, arte e design ----------
+27-1024|Designer gráfico|Comunicação, arte e design|Cria identidades, peças e materiais visuais.|Graduação ou tecnólogo em Design, ou cursos livres com portfólio
+27-1021|Designer de produto|Comunicação, arte e design|Projeta produtos físicos, do conceito ao protótipo.|Graduação em Design de Produto
+27-1022|Estilista e designer de moda|Comunicação, arte e design|Cria coleções de roupas e acessórios.|Graduação ou tecnólogo em Moda
+27-1025|Designer de interiores|Comunicação, arte e design|Projeta ambientes internos, funcionais e bonitos.|Tecnólogo em Design de Interiores ou graduação em Arquitetura
+27-1014|Animador(a) e artista de efeitos visuais|Comunicação, arte e design|Cria animação, personagens e efeitos para filmes, séries e jogos.
+27-1013|Artista plástico(a) e ilustrador(a)|Comunicação, arte e design|Cria obras de arte e ilustrações.|Graduação em Artes Visuais ou formação livre com portfólio
+27-1011|Diretor(a) de arte|Comunicação, arte e design|Define o visual de campanhas, filmes e produtos.
+27-2012|Diretor(a) e produtor(a) audiovisual|Comunicação, arte e design|Dirige e produz filmes, séries, vídeos e programas.|Graduação em Cinema, Audiovisual ou Comunicação
+27-4032|Editor(a) de vídeo|Comunicação, arte e design|Monta e finaliza vídeos, com ritmo, som e narrativa.
+27-4021|Fotógrafo(a)|Comunicação, arte e design|Cria imagens para moda, eventos, produtos, jornalismo e arte.
+27-3023|Jornalista|Comunicação, arte e design|Apura, escreve e conta notícias e reportagens.|Graduação em Jornalismo
+27-3031|Profissional de relações públicas e assessoria|Comunicação, arte e design|Cuida da imagem e da comunicação de pessoas e organizações.|Graduação em Relações Públicas, Jornalismo ou Publicidade
+27-3043|Escritor(a) e roteirista|Comunicação, arte e design|Escreve livros, roteiros, textos e conteúdos.
+27-3041|Editor(a) de texto|Comunicação, arte e design|Revisa e aprimora textos e organiza publicações.
+27-3042|Redator(a) técnico(a)|Comunicação, arte e design|Explica assuntos técnicos em manuais, guias e documentação.
+27-3091|Tradutor(a) e intérprete|Comunicação, arte e design|Traduz textos e interpreta conversas entre idiomas.
+27-2042|Músico(a) e cantor(a)|Comunicação, arte e design|Compõe, toca e se apresenta.
+27-2041|Maestro(a) e compositor(a)|Comunicação, arte e design|Rege grupos musicais e cria composições.
+27-2011|Ator e atriz|Comunicação, arte e design|Interpreta personagens no teatro, cinema, TV e publicidade.
+27-2031|Dançarino(a)|Comunicação, arte e design|Dança em companhias, espetáculos e produções.
+27-3011|Locutor(a) e apresentador(a)|Comunicação, arte e design|Apresenta programas e comunica ao vivo em rádio, TV e internet.
+27-4014|Técnico(a) de som|Comunicação, arte e design|Capta, mixa e opera som em shows, estúdios e eventos.
+27-2021|Atleta profissional|Comunicação, arte e design|Compete em alto nível, com treino e preparo constantes.
+27-1026|Vitrinista e visual merchandiser|Comunicação, arte e design|Monta vitrines e exposições que vendem o produto.
+27-1027|Cenógrafo(a)|Comunicação, arte e design|Projeta cenários de teatro, TV, cinema e eventos.
+
+# ---------- Serviços, turismo e gastronomia ----------
+35-1011|Chef de cozinha|Serviços, turismo e gastronomia|Cria cardápios e comanda a cozinha de restaurantes e hotéis.|Tecnólogo em Gastronomia ou curso técnico e experiência
+35-2014|Cozinheiro(a)|Serviços, turismo e gastronomia|Prepara pratos em restaurantes, hotéis e refeitórios.
+51-3011|Padeiro(a) e confeiteiro(a)|Serviços, turismo e gastronomia|Produz pães, bolos e doces.
+35-3011|Bartender|Serviços, turismo e gastronomia|Prepara drinks e atende no bar.
+39-7011|Guia de turismo|Serviços, turismo e gastronomia|Conduz turistas e conta a história e a cultura dos lugares.|Curso técnico em Guia de Turismo + cadastro no Cadastur
+53-2031|Comissário(a) de bordo|Serviços, turismo e gastronomia|Cuida da segurança e do atendimento dos passageiros no voo.|Ensino médio ou superior + curso de comissário (ANAC)
+39-5012|Cabeleireiro(a)|Serviços, turismo e gastronomia|Corta, colore e trata cabelos.
+39-5011|Barbeiro(a)|Serviços, turismo e gastronomia|Corta cabelo e faz barba.
+39-5094|Esteticista|Serviços, turismo e gastronomia|Faz tratamentos de beleza e cuidados com a pele.
+39-5091|Maquiador(a)|Serviços, turismo e gastronomia|Faz maquiagem para eventos, moda, TV e teatro.
+39-2011|Adestrador(a) de animais|Serviços, turismo e gastronomia|Treina animais, principalmente cães.
+39-2021|Tratador(a) de animais|Serviços, turismo e gastronomia|Cuida da alimentação e do bem-estar de animais em pet shops, abrigos e zoológicos.
+
+# ---------- Agro e meio ambiente ----------
+37-3011|Jardineiro(a)|Agro e meio ambiente|Cuida de plantas, jardins e áreas verdes.
+45-2091|Operador(a) de máquinas agrícolas|Agro e meio ambiente|Opera tratores e colheitadeiras.
+
+# ---------- Construção e manutenção ----------
+47-2111|Eletricista|Construção e manutenção|Instala e conserta redes e instalações elétricas.|Curso técnico ou profissionalizante em Eletricidade
+47-2152|Encanador(a)|Construção e manutenção|Instala e conserta tubulações de água, esgoto e gás.
+47-2031|Carpinteiro(a)|Construção e manutenção|Faz estruturas e acabamentos de madeira em obras.
+47-2021|Pedreiro(a)|Construção e manutenção|Levanta paredes e executa a parte de alvenaria de obras.
+47-2141|Pintor(a) de obras|Construção e manutenção|Prepara e pinta paredes e superfícies.
+47-2073|Operador(a) de máquinas pesadas|Construção e manutenção|Opera escavadeiras, retroescavadeiras e outros equipamentos de obra.
+47-1011|Mestre de obras|Construção e manutenção|Comanda a equipe e a execução diária de uma obra.
+47-4011|Fiscal de obras|Construção e manutenção|Confere se a obra segue o projeto e as normas.
+47-2231|Instalador(a) de painéis solares|Construção e manutenção|Instala sistemas de energia solar.
+49-3023|Mecânico(a) de automóveis|Construção e manutenção|Diagnostica e conserta carros.|Curso técnico ou profissionalizante em Mecânica Automotiva
+49-3052|Mecânico(a) de motos|Construção e manutenção|Diagnostica e conserta motocicletas.
+49-3031|Mecânico(a) de caminhões e ônibus|Construção e manutenção|Mantém e conserta veículos pesados a diesel.
+49-3021|Funileiro(a) e pintor(a) automotivo|Construção e manutenção|Recupera lataria e pintura de veículos.
+49-9021|Técnico(a) em refrigeração e ar-condicionado|Construção e manutenção|Instala e conserta sistemas de refrigeração e climatização.
+49-9041|Mecânico(a) de manutenção industrial|Construção e manutenção|Mantém e conserta máquinas de fábricas.
+49-2094|Técnico(a) em manutenção eletrônica industrial|Construção e manutenção|Mantém e conserta equipamentos eletrônicos industriais.
+49-2022|Técnico(a) em telecomunicações|Construção e manutenção|Instala e mantém equipamentos de telefonia e internet.
+49-9081|Técnico(a) de turbinas eólicas|Construção e manutenção|Mantém aerogeradores de parques eólicos.
+49-3011|Mecânico(a) de aeronaves|Construção e manutenção|Faz manutenção e reparo de aviões e helicópteros.|Curso técnico em Manutenção de Aeronaves (certificação ANAC)
+49-9071|Auxiliar de manutenção geral|Construção e manutenção|Faz pequenos reparos de elétrica, hidráulica e estrutura em prédios.
+49-2011|Técnico(a) de manutenção de computadores|Tecnologia|Monta e conserta computadores e equipamentos de escritório.
+49-9062|Técnico(a) de equipamentos médicos|Saúde|Instala e conserta equipamentos de hospitais e clínicas.
+
+# ---------- Indústria e produção ----------
+51-4121|Soldador(a)|Indústria e produção|Une peças de metal com solda.|Curso profissionalizante de Soldagem (SENAI e similares)
+51-4041|Torneiro(a) mecânico(a) e usinador(a)|Indústria e produção|Fabrica peças metálicas com máquinas de precisão.
+51-9161|Operador(a) de máquinas CNC|Indústria e produção|Opera máquinas de usinagem controladas por computador.
+51-4111|Ferramenteiro(a)|Indústria e produção|Fabrica moldes e ferramentas de precisão.
+51-7011|Marceneiro(a)|Indústria e produção|Fabrica móveis e peças de madeira sob medida.
+51-6052|Costureiro(a) e alfaiate|Indústria e produção|Costura e ajusta roupas sob medida.
+51-9071|Joalheiro(a)|Indústria e produção|Cria e conserta joias.
+51-9081|Protético(a) dentário(a)|Saúde|Confecciona próteses e aparelhos dentários.|Curso técnico em Prótese Dentária
+51-8031|Operador(a) de estação de tratamento de água|Indústria e produção|Opera e controla o tratamento de água e esgoto.
+51-9061|Inspetor(a) de qualidade|Indústria e produção|Confere se produtos atendem ao padrão.
+51-1011|Supervisor(a) de produção|Indústria e produção|Coordena a equipe e o ritmo de uma linha de produção.
+
+# ---------- Transporte e logística ----------
+53-2011|Piloto(a) de linha aérea|Transporte e logística|Comanda aeronaves de companhias aéreas.|Curso de piloto + licenças da ANAC
+53-2012|Piloto(a) comercial|Transporte e logística|Pilota aeronaves em táxi aéreo, agrícola e outras operações.|Curso de piloto + licenças da ANAC
+53-2021|Controlador(a) de tráfego aéreo|Transporte e logística|Orienta decolagens, pousos e rotas dos aviões.|Concurso público (Força Aérea) e curso específico
+53-3032|Motorista de caminhão|Transporte e logística|Transporta cargas por estradas.|CNH categoria E e curso de transporte de cargas

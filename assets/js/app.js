@@ -154,14 +154,14 @@ function renderIntro() {
       <div class="brand">Teste Vocacional</div>
 
       <h1 class="h1">Descubra quais carreiras combinam com você</h1>
-      <p class="lead">Você responde perguntas simples e, no final, recebe um texto pronto para colar no ChatGPT. Ele devolve uma análise completa do seu perfil, com profissões, cursos e um plano para testar antes de decidir.</p>
+      <p class="lead">Você responde perguntas simples e, no final, já vê as profissões que mais combinam com o seu perfil. Também recebe um texto pronto para colar no ChatGPT, que devolve uma análise completa, com cursos e um plano para testar antes de decidir.</p>
 
       <section class="how" aria-labelledby="how-title">
         <h2 class="h3" id="how-title">Como funciona</h2>
         <ol class="how-list">
           <li><span class="how-n">1</span><span><strong>Escolha o tamanho.</strong> Rápido, Equilibrado ou Completo. Quanto mais perguntas, mais precisa fica a análise.</span></li>
           <li><span class="how-n">2</span><span><strong>Responda com sinceridade.</strong> Não existe resposta certa. Vale o primeiro impulso.</span></li>
-          <li><span class="how-n">3</span><span><strong>Copie o texto final.</strong> No fim, um botão copia tudo para você.</span></li>
+          <li><span class="how-n">3</span><span><strong>Veja suas profissões e copie o texto.</strong> No fim, aparece uma lista calculada para você e um botão que copia tudo.</span></li>
           <li><span class="how-n">4</span><span><strong>Cole no ChatGPT e envie.</strong> A versão gratuita já resolve. A análise sai em segundos.</span></li>
         </ol>
       </section>
@@ -467,11 +467,67 @@ function finish() {
 }
 
 /* ---------- resultado ---------- */
+let careerFilter = 'todas';
+let careerExpanded = false;
+let ranking = null;
+
+const FILTROS = [
+  ['todas', 'Todas'],
+  ['tecnico', 'Técnico ou direto ao trabalho'],
+  ['superior', 'Graduação'],
+];
+
+function careerCardsHtml() {
+  if (!ranking || !ranking.ok) {
+    const msg =
+      ranking && ranking.motivo === 'perfil-plano'
+        ? 'Suas notas de interesse ficaram muito parecidas entre si, então nenhuma profissão se destaca de verdade. Isso é comum e quer dizer que você se interessa por várias coisas. Use a análise do ChatGPT abaixo para explorar, ou refaça com a versão Completa.'
+        : 'Não foi possível calcular as profissões agora.';
+    return `<p class="muted">${msg}</p>`;
+  }
+  const base = Matching.filtrar(ranking.lista, careerFilter);
+  const lista = careerExpanded ? base.slice(0, 30) : Matching.destaques(base, 12).escolhidas;
+  if (!lista.length) return '<p class="muted">Nenhuma profissão nesse filtro.</p>';
+  return lista
+    .map(
+      (c, i) => `
+    <li class="career">
+      <span class="career-rank">${i + 1}</span>
+      <div class="career-body">
+        <div class="career-top">
+          <h3 class="career-name">${esc(c.nome)}</h3>
+          <span class="career-tag tag-${c.rotulo === 'Muito alta' ? 'top' : c.rotulo === 'Alta' ? 'alta' : 'media'}">${esc(c.rotulo)}</span>
+        </div>
+        <div class="bar-track" aria-hidden="true"><div class="bar-fill" style="width:${Math.max(4, Math.round(Math.max(0, c.r) * 100))}%"></div></div>
+        <p class="career-desc">${esc(c.desc)}</p>
+        <p class="career-meta"><strong>${esc(c.area)}.</strong> ${esc(c.formacao)}</p>
+      </div>
+    </li>`
+    )
+    .join('');
+}
+
+function refreshCareers() {
+  const ul = $('#career-list');
+  if (!ul) return;
+  ul.innerHTML = careerCardsHtml();
+  document.querySelectorAll('.pill').forEach((b) => {
+    const on = b.dataset.filter === careerFilter;
+    b.classList.toggle('sel', on);
+    b.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+  const more = $('#career-more');
+  if (more) more.textContent = careerExpanded ? 'Mostrar menos' : 'Ver mais profissões';
+}
+
 function renderResult() {
   state.screen = 'result';
   plan = getPlan(state.tier);
   const scores = Scoring.compute(plan, state.answers);
-  promptText = PromptBuilder.build(state, plan, scores);
+  ranking = Matching.rank(scores, plan);
+  careerFilter = 'todas';
+  careerExpanded = false;
+  promptText = PromptBuilder.build(state, plan, scores, ranking);
   const canShare = !!navigator.share && window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
 
   const bars = scores.riasec
@@ -494,56 +550,87 @@ function renderResult() {
         .join(', ')
     : '';
 
+  const f = typeof CAREERS !== 'undefined' ? CAREERS.fonte : null;
+  const areasTxt = ranking && ranking.ok ? ranking.areas.slice(0, 3).map((a) => esc(a.area)).join(', ') : '';
+
   render(`
     <div class="page fade">
       <div class="brand">Teste Vocacional</div>
 
       <div class="done-badge">${ICON.check}<span>Teste concluído</span></div>
-      <h1 class="h1">${esc(state.personal.nome)}, falta só um passo</h1>
-      <p class="lead">Suas respostas viraram um texto pronto. Ele vai para o ChatGPT, que faz a análise completa. Siga os 3 passos abaixo.</p>
-
-      <ol class="steps">
-        <li class="step" id="step-1">
-          <span class="step-n">1</span>
-          <div class="step-body">
-            <h2 class="step-title">Copie o texto</h2>
-            <p class="muted">Ele já tem as suas respostas e as instruções para o ChatGPT.</p>
-            <button class="btn btn-primary btn-block" id="btn-copy" data-action="copy">${ICON.copy}<span>Copiar texto para o ChatGPT</span></button>
-          </div>
-        </li>
-        <li class="step" id="step-2">
-          <span class="step-n">2</span>
-          <div class="step-body">
-            <h2 class="step-title">Abra o ChatGPT</h2>
-            <p class="muted">Funciona na versão gratuita, no navegador ou no aplicativo.</p>
-            <a class="btn btn-ghost btn-block" id="btn-open" href="${CHATGPT_URL}" target="_blank" rel="noopener noreferrer">${ICON.external}<span>Abrir o ChatGPT</span></a>
-          </div>
-        </li>
-        <li class="step" id="step-3">
-          <span class="step-n">3</span>
-          <div class="step-body">
-            <h2 class="step-title">Cole e envie</h2>
-            <p class="muted">Toque e segure no campo de mensagem, escolha <strong>Colar</strong> e envie. No computador, use Ctrl+V. Se a resposta parar no meio, escreva <em>continue</em>.</p>
-          </div>
-        </li>
-      </ol>
-
-      <p class="note" id="copy-msg" role="status" aria-live="polite"></p>
-
-      <details class="card details" id="prompt-details">
-        <summary>Ver o texto que será copiado</summary>
-        <textarea id="prompt-view" class="textarea mono" rows="12" readonly aria-label="Texto para o ChatGPT"></textarea>
-      </details>
+      <h1 class="h1">${esc(state.personal.nome)}, este é o seu resultado</h1>
+      <p class="lead">Veja abaixo as profissões que mais combinam com o seu perfil, calculadas aqui mesmo. Para entender o porquê de cada uma e montar um plano, leve tudo para o ChatGPT.</p>
+      <button class="btn btn-ghost btn-block" data-action="to-steps">Ir para a análise com o ChatGPT</button>
 
       ${
         scores.riasec
           ? `<section class="card">
-              <h2 class="h3">Seu retrato rápido</h2>
-              <p class="muted">Código de interesses (Holland): <strong>${esc(scores.code)}</strong>${topValues ? '. Valores que mais pesam: ' + topValues + '.' : '.'} A análise do ChatGPT aprofunda isso.</p>
+              <h2 class="h3">Seu perfil de interesses</h2>
+              <p class="muted">Código Holland: <strong>${esc(scores.code)}</strong>${topValues ? '. Valores que mais pesam: ' + topValues + '.' : '.'}</p>
               <div class="bars">${bars}</div>
             </section>`
           : ''
       }
+
+      <section class="card" id="careers">
+        <h2 class="h3">Profissões que combinam com você</h2>
+        ${
+          ranking && ranking.ok
+            ? `<p class="muted">Comparamos os seus interesses${ranking.usouHabilidades ? ' e habilidades' : ''} com ${CAREERS.itens.length} profissões. Áreas com mais afinidade: <strong>${areasTxt}</strong>.</p>
+               <div class="pills" role="group" aria-label="Filtrar por formação">
+                 ${FILTROS.map(([k, t]) => `<button type="button" class="pill ${k === 'todas' ? 'sel' : ''}" aria-pressed="${k === 'todas'}" data-action="filter" data-filter="${k}">${t}</button>`).join('')}
+               </div>`
+            : ''
+        }
+        <ol class="career-list" id="career-list">${careerCardsHtml()}</ol>
+        ${ranking && ranking.ok ? '<button type="button" class="btn btn-ghost btn-block" id="career-more" data-action="more">Ver mais profissões</button>' : ''}
+        ${
+          ranking && ranking.ok
+            ? `<div class="conf conf-${ranking.confianca.nivel === 'média' ? 'media' : ranking.confianca.nivel}">
+                 <strong>Confiança desta lista: ${esc(ranking.confianca.nivel)}.</strong> ${esc(ranking.confianca.texto)}
+               </div>`
+            : ''
+        }
+        <p class="source">Afinidade é uma faixa de comparação entre profissões, e não a chance de você dar certo. A base vem dos EUA e foi adaptada ao Brasil: nomes, formação e mercado podem ser diferentes por aqui.</p>
+      </section>
+
+      <section id="steps" class="steps-wrap">
+        <h2 class="h2">Análise completa com o ChatGPT</h2>
+        <p class="lead">O ChatGPT explica por que cada profissão combina com você, aponta o que evitar e monta um plano de 30 dias. Siga os 3 passos.</p>
+
+        <ol class="steps">
+          <li class="step" id="step-1">
+            <span class="step-n">1</span>
+            <div class="step-body">
+              <h3 class="step-title">Copie o texto</h3>
+              <p class="muted">Ele já tem as suas respostas, as profissões calculadas e as instruções para o ChatGPT.</p>
+              <button class="btn btn-primary btn-block" id="btn-copy" data-action="copy">${ICON.copy}<span>Copiar texto para o ChatGPT</span></button>
+            </div>
+          </li>
+          <li class="step" id="step-2">
+            <span class="step-n">2</span>
+            <div class="step-body">
+              <h3 class="step-title">Abra o ChatGPT</h3>
+              <p class="muted">Funciona na versão gratuita, no navegador ou no aplicativo.</p>
+              <a class="btn btn-ghost btn-block" id="btn-open" href="${CHATGPT_URL}" target="_blank" rel="noopener noreferrer">${ICON.external}<span>Abrir o ChatGPT</span></a>
+            </div>
+          </li>
+          <li class="step" id="step-3">
+            <span class="step-n">3</span>
+            <div class="step-body">
+              <h3 class="step-title">Cole e envie</h3>
+              <p class="muted">Toque e segure no campo de mensagem, escolha <strong>Colar</strong> e envie. No computador, use Ctrl+V. Se a resposta parar no meio, escreva <em>continue</em>.</p>
+            </div>
+          </li>
+        </ol>
+
+        <p class="note" id="copy-msg" role="status" aria-live="polite"></p>
+
+        <details class="card details" id="prompt-details">
+          <summary>Ver o texto que será copiado</summary>
+          <textarea id="prompt-view" class="textarea mono" rows="12" readonly aria-label="Texto para o ChatGPT"></textarea>
+        </details>
+      </section>
 
       <section class="card">
         <h2 class="h3">Depois da primeira resposta, pergunte</h2>
@@ -561,6 +648,15 @@ function renderResult() {
         <button class="btn btn-ghost btn-block" data-action="download-csv">Baixar respostas (.csv)</button>
         <button class="btn btn-text btn-block" data-action="restart">Refazer o teste</button>
       </div>
+
+      ${
+        f
+          ? `<footer class="credits">
+              <p><strong>Base de profissões:</strong> ${esc(f.nome)}, com dados de ${esc(f.dadosDe)} a ${esc(f.dadosAte)}, reunida neste projeto em ${esc(f.geradoEm.split('-').reverse().join('/'))}. Quando as profissões mudarem, a base pode ser atualizada.</p>
+              <p>Este teste inclui informações do <a href="${esc(f.url)}" target="_blank" rel="noopener noreferrer">${esc(f.nome)}</a>, do ${esc(f.orgao)}, usadas sob a licença <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">${esc(f.licenca)}</a>. O*NET® é marca registrada do USDOL/ETA. Este projeto selecionou, traduziu e adaptou as informações e calcula a afinidade por conta própria. O USDOL/ETA não aprovou, endossou nem testou essas modificações.</p>
+            </footer>`
+          : ''
+      }
     </div>
   `);
   $('#prompt-view').value = promptText;
@@ -668,6 +764,18 @@ function onClick(e) {
       break;
     case 'copy':
       copyPrompt();
+      break;
+    case 'to-steps':
+      document.getElementById('steps').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      break;
+    case 'filter':
+      careerFilter = el.dataset.filter;
+      careerExpanded = false;
+      refreshCareers();
+      break;
+    case 'more':
+      careerExpanded = !careerExpanded;
+      refreshCareers();
       break;
     case 'share':
       sharePrompt();
