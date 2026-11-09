@@ -1,64 +1,54 @@
 const Export = {
-  generateCSV(state) {
-    const rows = [];
-
-    // Header row
-    const headers = [
-      'respondente_id',
-      'data_inicio',
-      'data_conclusao',
-      'duracao_minutos',
-      'nome',
-      'idade',
-      'genero',
-      'cidade',
-      ...QUESTIONS.flat.map(q => q.id)
-    ];
-    rows.push(headers);
-
-    // Data row
-    const startTime = new Date(state.startTime);
-    const endTime = new Date();
-    const durationMins = Math.round((endTime - startTime) / 60000);
-
-    const values = [
-      state.respondentId,
-      startTime.toISOString(),
-      endTime.toISOString(),
-      durationMins,
-      this.escapeCsv(state.personalData.nome || ''),
-      state.personalData.idade || '',
-      this.escapeCsv(state.personalData.genero || ''),
-      this.escapeCsv(state.personalData.cidade || ''),
-      ...QUESTIONS.flat.map(q => this.escapeCsv(String(state.answers[q.id] || '')))
-    ];
-    rows.push(values);
-
-    return rows.map(r => r.join(',')).join('\n');
+  // evita que o Excel trate uma resposta como fórmula (=, +, -, @)
+  cell(value) {
+    let s = value === null || value === undefined ? '' : String(value);
+    if (/^[=+\-@]/.test(s)) s = "'" + s;
+    if (/[",\n\r]/.test(s)) s = '"' + s.replace(/"/g, '""') + '"';
+    return s;
   },
 
-  escapeCsv(value) {
-    if (value === null || value === undefined) return '';
-    const str = String(value);
-    if (str.includes(',') || str.includes('"') || str.includes('\n') || str.includes('\r')) {
-      return '"' + str.replace(/"/g, '""') + '"';
-    }
-    return str;
+  csv(state, plan) {
+    const p = state.personal;
+    const head = ['respondente_id', 'nome', 'idade', 'momento', 'cidade', 'versao', 'secao', 'pergunta_id', 'grupo', 'pergunta', 'resposta'];
+    const rows = [head];
+    plan.sections.forEach((sec) => {
+      sec.questions.forEach((q) => {
+        rows.push([
+          state.respondentId,
+          p.nome,
+          p.idade,
+          p.momentoLabel,
+          p.cidade || '',
+          plan.meta.nome,
+          sec.title,
+          q.id,
+          q.dim,
+          q.text,
+          state.answers[q.id] === undefined ? '' : state.answers[q.id],
+        ]);
+      });
+    });
+    return rows.map((r) => r.map((c) => this.cell(c)).join(',')).join('\n');
   },
 
-  download(state) {
-    const csv = this.generateCSV(state);
-    const bom = '﻿';
-    const blob = new Blob([bom + csv], { type: 'text/csv;charset=utf-8;' });
+  fileName(state, ext) {
+    const nome = (state.personal.nome || 'respondente')
+      .normalize('NFD')
+      .replace(/[̀-ͯ]/g, '')
+      .replace(/[^a-zA-Z0-9]+/g, '_')
+      .toLowerCase();
+    return `vocacional_${nome}_${new Date().toISOString().slice(0, 10)}.${ext}`;
+  },
+
+  download(content, filename, type) {
+    const blob = new Blob(['﻿' + content], { type: `${type};charset=utf-8;` });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    const date = new Date().toISOString().slice(0, 10);
-    const nome = (state.personalData.nome || 'respondente').replace(/\s+/g, '_').toLowerCase();
-    link.href = url;
-    link.download = `vocacional_${nome}_${date}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  }
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  },
 };

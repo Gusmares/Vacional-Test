@@ -1,289 +1,469 @@
-const QUESTIONS = {
-  parts: [
-    {
-      id: 'perfil',
-      index: 0,
-      title: 'Perfil Pessoal',
-      subtitle: 'Como você se enxerga e age no dia a dia',
-      emoji: '🧭',
-      color: '#6366F1',
-      colorLight: '#EEF2FF',
-      intro: 'Vamos começar pelo mais importante: entender quem você é. Não há respostas certas ou erradas — apenas verdades suas.',
-      questions: [
-        { id: 'energia_social', type: 'likert', text: 'Prefiro trabalhar em equipe do que sozinho.' },
-        { id: 'lideranca_natural', type: 'likert', text: 'Em grupos, costumo assumir naturalmente o papel de liderança.' },
-        { id: 'comunicacao_oral', type: 'likert', text: 'Tenho facilidade em me expressar e articular ideias verbalmente.' },
-        { id: 'comunicacao_escrita', type: 'likert', text: 'Prefiro me comunicar por escrito — textos, e-mails, mensagens — do que verbalmente.' },
-        { id: 'organizacao_pessoal', type: 'likert', text: 'Sou naturalmente organizado: cuido do meu espaço, agenda e tarefas com facilidade.' },
-        { id: 'criatividade_diaria', type: 'likert', text: 'Costumo pensar em formas novas e criativas de resolver problemas cotidianos.' },
-        { id: 'analise_logica', type: 'likert', text: 'Prefiro resolver problemas com base em lógica, dados e raciocínio estruturado.' },
-        { id: 'sensibilidade_emocional', type: 'likert', text: 'Sou emocionalmente sensível e percebo sutilezas no comportamento das pessoas ao meu redor.' },
-        { id: 'foco_detalhe', type: 'likert', text: 'Prefiro trabalhar com detalhes e precisão ao invés de apenas com visão geral.' },
-        { id: 'adaptabilidade', type: 'likert', text: 'Me adapto com facilidade a mudanças, imprevistos e novos contextos.' },
-        { id: 'autonomia_trabalho', type: 'likert', text: 'Prefiro trabalhar com autonomia e independência, sem supervisão constante.' },
-        { id: 'conforto_rotina', type: 'likert', text: 'Me sinto confortável e produtivo em rotinas e processos bem estabelecidos.' },
-        { id: 'aprendizado_continuo', type: 'likert', text: 'Tenho um desejo genuíno e constante de aprender coisas novas.' },
-        { id: 'paciencia_ensinar', type: 'likert', text: 'Tenho paciência e prazer em ensinar ou explicar algo para outras pessoas.' },
-        { id: 'perfeccionismo', type: 'likert', text: 'Costumo querer que o trabalho esteja completo e refinado antes de considerar finalizado.' },
-      ]
-    },
-    {
-      id: 'interesses',
-      index: 1,
-      title: 'Interesses Profissionais',
-      subtitle: 'O que desperta genuína curiosidade em você',
-      emoji: '🔍',
-      color: '#0EA5E9',
-      colorLight: '#F0F9FF',
-      intro: 'Agora exploramos seus interesses. Responda com o que realmente te move — não o que "deveria" te mover.',
-      questions: [
-        { id: 'interesse_tecnologia', type: 'likert', text: 'Tenho interesse genuíno por tecnologia, inovação e o futuro digital.' },
-        { id: 'interesse_saude', type: 'likert', text: 'Me interessa profundamente trabalhar com saúde, cuidado e bem-estar das pessoas.' },
-        { id: 'interesse_educacao', type: 'likert', text: 'Sinto vontade de trabalhar com educação, ensino e desenvolvimento humano.' },
-        { id: 'interesse_arte_design', type: 'likert', text: 'Me atrai genuinamente a área de arte, design e expressão criativa visual.' },
-        { id: 'interesse_negocios', type: 'likert', text: 'Sinto interesse pelo mundo dos negócios, estratégia e empreendedorismo.' },
-        { id: 'interesse_ciencias_exatas', type: 'likert', text: 'Tenho fascínio por ciências exatas, matemática, física ou química.' },
-        { id: 'interesse_ciencias_humanas', type: 'likert', text: 'Me interessa estudar comportamento humano, sociedade, cultura e história.' },
-        { id: 'interesse_meio_ambiente', type: 'likert', text: 'Sinto conexão com natureza, ecologia, sustentabilidade e meio ambiente.' },
-        { id: 'interesse_direito', type: 'likert', text: 'Me interessa o campo do direito, leis, ética e justiça.' },
-        { id: 'interesse_comunicacao', type: 'likert', text: 'Sinto vontade de trabalhar com comunicação, jornalismo, marketing ou mídia.' },
-        { id: 'interesse_financas', type: 'likert', text: 'Me interessa o mercado financeiro, economia, investimentos e análise de dados.' },
-        { id: 'interesse_esportes', type: 'likert', text: 'Sinto atração por esporte, educação física, performance e movimento.' },
-        { id: 'interesse_gastronomia', type: 'likert', text: 'Me interessa culinária, gastronomia, alimentação e cultura gastronômica.' },
-        { id: 'interesse_musica', type: 'likert', text: 'Sinto conexão profunda com música, ritmo, composição ou performance sonora.' },
-        { id: 'interesse_arquitetura', type: 'likert', text: 'Me interessa arquitetura, urbanismo, espaços e o ambiente construído.' },
-        { id: 'interesse_engenharia', type: 'likert', text: 'Tenho vontade de criar, projetar e desenvolver soluções de engenharia.' },
-        { id: 'interesse_medicina_clinica', type: 'likert', text: 'Tenho interesse pela medicina, diagnóstico clínico e ciências da saúde.' },
-        { id: 'interesse_psicologia', type: 'likert', text: 'Me interessa compreender a mente humana, emoções e comportamento.' },
-        { id: 'interesse_politica_social', type: 'likert', text: 'Sinto vontade de participar da vida política, social e de transformação coletiva.' },
-        { id: 'interesse_moda_cultura', type: 'likert', text: 'Me interessa o universo da moda, estilo e identidade cultural.' },
-      ]
-    },
-    {
-      id: 'habilidades',
-      index: 2,
-      title: 'Habilidades e Comportamento',
-      subtitle: 'Como você age, pensa e performa',
-      emoji: '⚡',
-      color: '#F59E0B',
-      colorLight: '#FFFBEB',
-      intro: 'Esta etapa revela como você opera. Seja honesto — é justamente na honestidade que as descobertas mais importantes aparecem.',
-      questions: [
-        { id: 'habilidade_negociacao', type: 'likert', text: 'Tenho facilidade em negociar, persuadir e encontrar acordos.' },
-        { id: 'habilidade_escuta_ativa', type: 'likert', text: 'Sou um bom ouvinte — consigo entender as pessoas com profundidade e sem julgamento.' },
-        { id: 'habilidade_planejamento', type: 'likert', text: 'Tenho facilidade em planejar, organizar e estruturar projetos complexos.' },
-        { id: 'habilidade_criacao', type: 'likert', text: 'Consigo criar coisas novas com naturalidade — textos, arte, produtos, ideias.' },
-        { id: 'habilidade_calculo', type: 'likert', text: 'Tenho facilidade com cálculos, raciocínio matemático e análise numérica.' },
-        { id: 'habilidade_pesquisa_analise', type: 'likert', text: 'Gosto e tenho habilidade em pesquisar, analisar dados e extrair insights.' },
-        { id: 'habilidade_apresentacao', type: 'likert', text: 'Consigo apresentar ideias de forma clara, envolvente e convincente.' },
-        { id: 'habilidade_escrita_criativa', type: 'likert', text: 'Tenho facilidade com escrita criativa, narrativas e construção de textos.' },
-        { id: 'habilidade_tecnica', type: 'likert', text: 'Me considero uma pessoa com boas habilidades técnicas na minha área de interesse.' },
-        { id: 'habilidade_empatia', type: 'likert', text: 'Consigo me colocar genuinamente no lugar dos outros com facilidade.' },
-        { id: 'comportamento_tolerancia_risco', type: 'likert', text: 'Me sinto confortável tomando riscos calculados em situações importantes.' },
-        { id: 'comportamento_metodico', type: 'likert', text: 'Sigo processos e métodos com rigor — prefiro a consistência ao improviso.' },
-        { id: 'comportamento_intuitivo', type: 'likert', text: 'Costumo confiar na intuição como guia para decisões importantes.' },
-        { id: 'comportamento_competitivo', type: 'likert', text: 'Sou naturalmente orientado a resultados e me motivo com metas e desafios.' },
-        { id: 'comportamento_colaborativo', type: 'likert', text: 'Prefiro construir resultados em conjunto com outros a trabalhar sozinho.' },
-        { id: 'comportamento_inovador', type: 'likert', text: 'Gosto de propor ideias novas e questionar a forma como as coisas são feitas.' },
-        { id: 'comportamento_executor', type: 'likert', text: 'Me sinto mais realizado executando e entregando do que apenas planejando.' },
-        { id: 'comportamento_estrategico', type: 'likert', text: 'Penso de forma estratégica, com foco no longo prazo e no quadro geral.' },
-        { id: 'gestao_tempo', type: 'likert', text: 'Tenho boa gestão do meu tempo e sei priorizar o que é importante.' },
-        { id: 'resiliencia', type: 'likert', text: 'Me recupero bem de fracassos, críticas e situações difíceis.' },
-        { id: 'iniciativa', type: 'likert', text: 'Costumo tomar a iniciativa sem precisar ser incentivado ou cobrado.' },
-        { id: 'trabalho_pressao', type: 'likert', text: 'Funciono bem sob pressão — prazos e situações de alta exigência me ativam.' },
-        { id: 'autonomia_decisao', type: 'likert', text: 'Me sinto seguro tomando decisões importantes de forma independente.' },
-        { id: 'abertura_feedback', type: 'likert', text: 'Recebo bem críticas e feedbacks — os vejo como oportunidade de crescimento.' },
-        { id: 'multitarefa', type: 'likert', text: 'Consigo trabalhar em várias frentes ao mesmo tempo sem perder eficiência.' },
-        { id: 'foco_profundo', type: 'likert', text: 'Prefiro me concentrar profundamente em uma coisa de cada vez.' },
-        { id: 'curiosidade_intelectual', type: 'likert', text: 'Tenho alta curiosidade intelectual — gosto de aprofundar e explorar temas com rigor.' },
-        { id: 'disciplina', type: 'likert', text: 'Sou disciplinado e consistente nas minhas ações, mesmo sem pressão externa.' },
-        { id: 'visao_sistemica', type: 'likert', text: 'Consigo visualizar como as partes de um sistema se conectam e se afetam.' },
-        { id: 'resolucao_conflito', type: 'likert', text: 'Tenho facilidade em mediar e resolver conflitos entre pessoas.' },
-      ]
-    },
-    {
-      id: 'valores',
-      index: 3,
-      title: 'Valores e Futuro',
-      subtitle: 'O que você quer construir e o que não abre mão',
-      emoji: '🌱',
-      color: '#10B981',
-      colorLight: '#ECFDF5',
-      intro: 'Esta etapa é sobre o que realmente importa para você. Seus valores são a bússola que vai guiar todas as escolhas profissionais.',
-      questions: [
-        { id: 'valor_proposito', type: 'likert', text: 'Ter propósito e significado no trabalho é mais importante para mim do que o salário.' },
-        { id: 'valor_impacto_social', type: 'likert', text: 'Quero que meu trabalho gere impacto real e positivo na vida de outras pessoas.' },
-        { id: 'valor_autonomia', type: 'likert', text: 'Autonomia e liberdade para tomar decisões são essenciais para mim no trabalho.' },
-        { id: 'valor_estabilidade', type: 'likert', text: 'Prefiro estabilidade e segurança profissional a riscos e aventuras imprevisíveis.' },
-        { id: 'valor_reconhecimento', type: 'likert', text: 'O reconhecimento público pelo meu trabalho é muito importante para mim.' },
-        { id: 'valor_criatividade', type: 'likert', text: 'Preciso de espaço para criatividade e expressão no meu trabalho — sem isso, me sinto preso.' },
-        { id: 'valor_aprendizado_continuo', type: 'likert', text: 'Quero estar sempre aprendendo, crescendo e evoluindo profissionalmente.' },
-        { id: 'valor_remuneracao', type: 'likert', text: 'A remuneração financeira é um fator decisivo nas minhas escolhas de carreira.' },
-        { id: 'valor_flexibilidade', type: 'likert', text: 'Flexibilidade de horário e local de trabalho é essencial para minha qualidade de vida.' },
-        { id: 'valor_crescimento_hierarquico', type: 'likert', text: 'Me importa ter um plano claro de crescimento e progressão na carreira.' },
-        { id: 'valor_trabalho_equipe', type: 'likert', text: 'Valorizo profundamente trabalhar com uma equipe de alto nível.' },
-        { id: 'valor_inovacao', type: 'likert', text: 'Quero trabalhar em ambientes inovadores e de vanguarda.' },
-        { id: 'valor_tradicao_empresas', type: 'likert', text: 'Me sinto confortável e motivado em empresas tradicionais e consolidadas.' },
-        { id: 'valor_missao_social', type: 'likert', text: 'Quero que minha carreira tenha uma dimensão de contribuição social clara.' },
-        { id: 'valor_atuacao_global', type: 'likert', text: 'Tenho vontade de trabalhar em contexto global ou internacional.' },
-        { id: 'desejo_empreender', type: 'likert', text: 'Tenho vontade genuína de ter meu próprio negócio algum dia.' },
-        { id: 'interesse_carreira_corporativa', type: 'likert', text: 'Me vejo construindo uma carreira dentro de uma empresa corporativa estruturada.' },
-        { id: 'interesse_carreira_freelance', type: 'likert', text: 'Me vejo trabalhando de forma independente, como freelancer ou consultor.' },
-        { id: 'interesse_carreira_academica', type: 'likert', text: 'Tenho interesse em seguir carreira acadêmica ou científica.' },
-        { id: 'interesse_setor_publico', type: 'likert', text: 'Tenho interesse em servir ao setor público ou governamental.' },
-        { id: 'clareza_futuro_profissional', type: 'likert', text: 'Já tenho uma visão clara de onde quero estar profissionalmente em 5 anos.' },
-        { id: 'capacidade_autodidata', type: 'likert', text: 'Consigo aprender de forma autodidata com facilidade e disciplina.' },
-        { id: 'interesse_experiencia_internacional', type: 'likert', text: 'Tenho interesse real em trabalhar ou estudar fora do Brasil.' },
-        { id: 'possuo_projeto_proprio', type: 'likert', text: 'Tenho alguma ideia de projeto ou negócio que gostaria de desenvolver.' },
-        { id: 'reflexao_legado_carreira', type: 'likert', text: 'Penso frequentemente no legado que quero deixar ao longo da minha carreira.' },
-      ]
-    },
-    {
-      id: 'cenarios',
-      index: 4,
-      title: 'Cenários Profissionais',
-      subtitle: 'Imagine-se nesses contextos',
-      emoji: '🎬',
-      color: '#EC4899',
-      colorLight: '#FDF2F8',
-      intro: 'Esta etapa usa cenários reais. Imagine-se genuinamente em cada situação e responda conforme o que sentiria.',
-      questions: [
-        { id: 'cenario_resolver_problemas_complexos', type: 'likert', text: 'Quando há um problema complexo, gosto de ser o responsável por resolvê-lo.' },
-        { id: 'cenario_apresentacao_publica', type: 'likert', text: 'Imaginar apresentar um projeto para uma plateia grande me deixa animado.' },
-        { id: 'cenario_analise_dados', type: 'likert', text: 'Analisar um grande conjunto de dados para encontrar padrões me parece empolgante.' },
-        { id: 'cenario_cuidado_pessoas', type: 'likert', text: 'Cuidar de alguém em dificuldade e ver sua melhora me gera profunda realização.' },
-        { id: 'cenario_criar_produto', type: 'likert', text: 'Criar um produto do zero — da ideia até a entrega — me entusiasma genuinamente.' },
-        { id: 'cenario_liderar_equipe', type: 'likert', text: 'Liderar uma equipe em um projeto desafiador me parece uma experiência empolgante.' },
-        { id: 'cenario_pesquisa_profunda', type: 'likert', text: 'Pesquisar profundamente sobre um tema complexo por semanas me dá prazer e satisfação.' },
-        { id: 'cenario_excelencia_operacional', type: 'likert', text: 'Executar processos operacionais com excelência e consistência me satisfaz.' },
-        { id: 'cenario_negociacao_vendas', type: 'likert', text: 'Negociar com clientes, fechar acordos e vender me parece uma atividade estimulante.' },
-        { id: 'cenario_ensinar_outros', type: 'likert', text: 'Ensinar algo que sei para alguém que não sabe me gera satisfação genuína.' },
-        { id: 'cenario_construir_sistema', type: 'likert', text: 'Construir um sistema, estrutura ou processo do zero me entusiasma muito.' },
-        { id: 'cenario_consultoria', type: 'likert', text: 'Ser consultado por outras pessoas e dar orientação estratégica me agrada.' },
-        { id: 'cenario_trabalho_campo', type: 'likert', text: 'Trabalhar em campo — fora do escritório, no mundo real — me parece mais atraente.' },
-        { id: 'cenario_trabalho_remoto', type: 'likert', text: 'Trabalhar de forma 100% remota, de qualquer lugar, me parece ideal.' },
-        { id: 'cenario_startup_fase_inicial', type: 'likert', text: 'Trabalhar em uma startup em fase inicial, com incerteza e muito por construir, me parece empolgante.' },
-        { id: 'cenario_grande_empresa', type: 'likert', text: 'Trabalhar em uma grande empresa estabelecida e estruturada me parece mais ideal.' },
-        { id: 'cenario_missao_social_org', type: 'likert', text: 'Trabalhar em uma organização com forte missão social me atrai profundamente.' },
-        { id: 'cenario_tecnologia_ponta', type: 'likert', text: 'Trabalhar com tecnologia de ponta e ferramentas do futuro me entusiasma.' },
-        { id: 'cenario_arte_cultura', type: 'likert', text: 'Trabalhar em um ambiente cultural, artístico ou criativo me agrada muito.' },
-        { id: 'cenario_saude_cuidado_direto', type: 'likert', text: 'Trabalhar diretamente com saúde, cuidado e bem-estar de pacientes ou clientes me realiza.' },
-        { id: 'cenario_natureza_ambiente', type: 'likert', text: 'Trabalhar em contato com a natureza, campo ou meio ambiente me atrai.' },
-        { id: 'cenario_educacao_formal', type: 'likert', text: 'Trabalhar dentro do sistema de educação formal me parece uma carreira significativa.' },
-        { id: 'cenario_pesquisa_laboratorio', type: 'likert', text: 'Trabalhar em laboratório ou pesquisa científica de ponta me agrada.' },
-        { id: 'cenario_mercado_financeiro', type: 'likert', text: 'Trabalhar no mercado financeiro, com investimentos e análise de mercados, me parece estimulante.' },
-        { id: 'cenario_comunicacao_midia', type: 'likert', text: 'Trabalhar com comunicação, criação de conteúdo ou mídia me atrai.' },
-        { id: 'cenario_arquitetura_design_espacos', type: 'likert', text: 'Trabalhar com arquitetura, design de interiores ou espaços me entusiasma.' },
-        { id: 'cenario_gestao_pessoas', type: 'likert', text: 'Gerir, desenvolver e inspirar pessoas é algo que me parece uma atividade nobre e empolgante.' },
-        { id: 'cenario_inovacao_social', type: 'likert', text: 'Criar soluções inovadoras para problemas sociais complexos me realiza.' },
-        { id: 'cenario_logistica_operacoes', type: 'likert', text: 'Coordenar logística e operações complexas me parece interessante e estimulante.' },
-        { id: 'cenario_juridico_legislacao', type: 'likert', text: 'Trabalhar com leis, contratos e questões jurídicas me atrai.' },
-      ]
-    },
-    {
-      id: 'abertas',
-      index: 5,
-      title: 'Reflexões Abertas',
-      subtitle: 'Suas palavras, do jeito que você quiser',
-      emoji: '✍️',
-      color: '#8B5CF6',
-      colorLight: '#F5F3FF',
-      intro: 'A última etapa é a mais importante. Aqui você escreve com as suas próprias palavras. Não há respostas certas — apenas as suas.',
-      questions: [
-        {
-          id: 'abertura_profissao_dos_sonhos',
-          type: 'open',
-          text: 'Se você pudesse escolher qualquer profissão sem restrições — financeiras, sociais ou de habilidade — qual seria? Por quê?',
-          placeholder: 'Escreva livremente, sem filtros. Deixe a imaginação falar...'
-        },
-        {
-          id: 'abertura_atividade_flow',
-          type: 'open',
-          text: 'Qual atividade — profissional ou não — faz o tempo "passar voando" sem você perceber?',
-          placeholder: 'Pense em momentos onde você ficou completamente absorto em algo...'
-        },
-        {
-          id: 'abertura_pessoa_admirada',
-          type: 'open',
-          text: 'Quem você mais admira profissionalmente e o que essa pessoa representa para você?',
-          placeholder: 'Pode ser alguém famoso, próximo a você, ou até uma figura histórica...'
-        },
-        {
-          id: 'abertura_maior_habilidade',
-          type: 'open',
-          text: 'Qual é a sua maior habilidade ou competência hoje — algo que você genuinamente sabe que faz bem?',
-          placeholder: 'Não seja modesto. O que as pessoas reconhecem em você?'
-        },
-        {
-          id: 'abertura_maior_desafio',
-          type: 'open',
-          text: 'Qual é o maior desafio ou limitação que você reconhece em si mesmo, com honestidade?',
-          placeholder: 'A autoconsciência é o primeiro passo para qualquer evolução...'
-        },
-        {
-          id: 'abertura_impacto_mundo',
-          type: 'open',
-          text: 'Como você quer impactar o mundo através do seu trabalho?',
-          placeholder: 'Pode ser algo pequeno e local, ou algo grande e global. O que importa é que seja genuíno...'
-        },
-        {
-          id: 'abertura_ambiente_ideal',
-          type: 'open',
-          text: 'Descreva o seu ambiente de trabalho ideal em detalhes — o local, as pessoas, o ritmo, a cultura.',
-          placeholder: 'Feche os olhos e imagine o lugar onde você seria mais feliz trabalhando...'
-        },
-        {
-          id: 'abertura_realizacao_profissional',
-          type: 'open',
-          text: 'O que te faria sentir completamente realizado profissionalmente daqui a 10 ou 20 anos?',
-          placeholder: 'Pense no longo prazo — não na próxima etapa, mas no horizonte final...'
-        },
-        {
-          id: 'abertura_o_que_nao_quer',
-          type: 'open',
-          text: 'Que tipo de trabalho ou contexto profissional você definitivamente NÃO quer para a sua vida?',
-          placeholder: 'Às vezes saber o que não queremos é tão importante quanto saber o que queremos...'
-        },
-        {
-          id: 'abertura_habilidade_desenvolver',
-          type: 'open',
-          text: 'Que habilidade ou conhecimento você mais gostaria de desenvolver nos próximos anos?',
-          placeholder: 'Pode ser algo técnico, comportamental, criativo... O que te fascina aprender?'
-        },
-        {
-          id: 'abertura_tres_valores',
-          type: 'open',
-          text: 'Quais são os 3 valores mais importantes para você na vida — aqueles que você não abre mão?',
-          placeholder: 'Pense em princípios que guiam suas decisões mais importantes...'
-        },
-        {
-          id: 'abertura_como_decide',
-          type: 'open',
-          text: 'Como você geralmente toma decisões importantes? Descreva seu processo.',
-          placeholder: 'Você pesquisa muito? Confia na intuição? Conversa com alguém? Como é para você?'
-        },
-        {
-          id: 'abertura_legado',
-          type: 'open',
-          text: 'Que legado você quer deixar — o que quer que as pessoas digam sobre você depois que você partir?',
-          placeholder: 'Esta é uma das perguntas mais profundas. Reserve um momento para responder com cuidado...'
-        },
-        {
-          id: 'abertura_complemento_livre',
-          type: 'open',
-          text: 'Há algo importante sobre você, seus sonhos ou sua história que as perguntas não capturaram? Este espaço é seu.',
-          placeholder: 'Fale o que quiser. Este é um espaço completamente livre para você...'
-        },
-      ]
-    }
-  ]
+/* =========================================================
+   BANCO DE PERGUNTAS
+   Base teórica:
+   - Interesses: modelo RIASEC de Holland (mesma lógica do O*NET Interest Profiler)
+   - Jeito de ser: Big Five em versão curta (estilo Mini-IPIP, com itens invertidos)
+   - Valores: âncoras de carreira de Schein + valores de trabalho de Super
+   Todas as frases são originais, escritas para o contexto brasileiro.
+
+   COMO EDITAR
+   - Cada lista está em ordem de prioridade. A versão Rápida usa as primeiras
+     frases de cada grupo, a Equilibrada usa mais, a Completa usa todas.
+   - Para mudar quantas perguntas cada versão tem, mexa só em TIERS (mais abaixo).
+   - Item invertido (nota alta significa o contrário): use rev('texto').
+   ========================================================= */
+
+const rev = (t) => ({ t, rev: true });
+
+/* ---------- Escalas de resposta ---------- */
+const SCALES = {
+  interesse: {
+    ask: 'O quanto você gostaria de fazer isso?',
+    labels: ['Não gostaria nada', 'Gostaria pouco', 'Tanto faz', 'Gostaria', 'Gostaria muito'],
+  },
+  competencia: {
+    ask: 'O quanto você se sai bem nisso hoje?',
+    labels: ['Tenho muita dificuldade', 'Tenho alguma dificuldade', 'Mais ou menos', 'Faço bem', 'Faço muito bem'],
+  },
+  concordo: {
+    ask: 'O quanto isso parece com você?',
+    labels: ['Nada a ver comigo', 'Pouco a ver comigo', 'Mais ou menos', 'Tem a ver comigo', 'É a minha cara'],
+  },
+  importancia: {
+    ask: 'O quanto isso pesa na sua escolha de carreira?',
+    labels: ['Não pesa nada', 'Pesa pouco', 'Pesa mais ou menos', 'Pesa bastante', 'É essencial'],
+  },
 };
 
-// Flattened list for easy access
-QUESTIONS.flat = QUESTIONS.parts.flatMap((part, pi) =>
-  part.questions.map((q, qi) => ({ ...q, partIndex: pi, questionIndex: qi, partId: part.id }))
-);
+/* ---------- Dimensões ---------- */
+const RIASEC = {
+  R: { nome: 'Realista', curto: 'mão na massa, ferramentas, máquinas, ar livre' },
+  I: { nome: 'Investigativo', curto: 'pesquisar, analisar, entender como as coisas funcionam' },
+  A: { nome: 'Artístico', curto: 'criar, expressar ideias, estética, originalidade' },
+  S: { nome: 'Social', curto: 'ajudar, ensinar, cuidar, trabalhar com pessoas' },
+  E: { nome: 'Empreendedor', curto: 'liderar, persuadir, negociar, abrir caminhos' },
+  C: { nome: 'Convencional', curto: 'organizar, seguir processos, cuidar de detalhes e dados' },
+};
 
-QUESTIONS.totalLikert = QUESTIONS.flat.filter(q => q.type === 'likert').length;
-QUESTIONS.totalOpen = QUESTIONS.flat.filter(q => q.type === 'open').length;
-QUESTIONS.total = QUESTIONS.flat.length;
+const BIG5 = {
+  E: { nome: 'Extroversão', curto: 'energia vinda do contato com pessoas' },
+  A: { nome: 'Amabilidade', curto: 'cooperação, empatia, paciência com os outros' },
+  C: { nome: 'Disciplina e organização', curto: 'planejamento, constância, cumprir o combinado' },
+  S: { nome: 'Estabilidade emocional', curto: 'calma sob pressão, recuperação depois de frustrações' },
+  O: { nome: 'Abertura ao novo', curto: 'curiosidade, ideias abstratas, gosto por mudança' },
+};
+
+const VALORES = {
+  autonomia: { nome: 'Autonomia', curto: 'decidir como e quando trabalhar' },
+  estabilidade: { nome: 'Estabilidade', curto: 'segurança e previsibilidade' },
+  proposito: { nome: 'Propósito', curto: 'ajudar e fazer sentido' },
+  desafio: { nome: 'Desafio e aprendizado', curto: 'problemas difíceis, crescer sempre' },
+  equilibrio: { nome: 'Equilíbrio de vida', curto: 'tempo livre e flexibilidade' },
+  remuneracao: { nome: 'Remuneração', curto: 'ganhar bem' },
+  reconhecimento: { nome: 'Reconhecimento', curto: 'respeito, prestígio, ser referência' },
+  criacao: { nome: 'Criar algo próprio', curto: 'inovar, empreender, fazer do seu jeito' },
+};
+
+/* ---------- Seções (a ordem aqui é a ordem do teste) ---------- */
+const SECTIONS = [
+  /* 1. ATIVIDADES (interesses RIASEC) */
+  {
+    id: 'atividades',
+    title: 'Atividades',
+    kind: 'dims',
+    scale: 'interesse',
+    meta: RIASEC,
+    order: ['R', 'I', 'A', 'S', 'E', 'C'],
+    intro:
+      'Imagine que dinheiro, nota e a opinião dos outros não importam. Para cada atividade, diga o quanto você gostaria de fazer. Não precisa saber fazer, basta ter vontade.',
+    items: {
+      R: [
+        'Consertar uma moto, uma bicicleta ou um eletrodoméstico.',
+        'Montar ou construir algo com as próprias mãos, como um móvel ou uma estrutura.',
+        'Trabalhar ao ar livre, com plantas, animais, terra ou obra.',
+        'Operar máquinas, equipamentos ou veículos.',
+        'Instalar a parte elétrica ou hidráulica de uma casa.',
+        'Trabalhar em campo, oficina ou fábrica, e não em escritório.',
+        'Aprender a usar ferramentas técnicas, como solda, torno ou drone.',
+      ],
+      I: [
+        'Fazer experimentos para descobrir como algo funciona.',
+        'Ler sobre descobertas científicas e entender o porquê das coisas.',
+        'Analisar números ou dados para encontrar padrões e explicações.',
+        'Resolver problemas difíceis de lógica, matemática ou quebra-cabeça.',
+        'Pesquisar um assunto a fundo, por semanas, até entender tudo.',
+        'Investigar a causa de um problema, como por que uma doença surge ou um sistema falha.',
+        'Estudar o corpo humano, o cérebro ou a natureza em um laboratório.',
+      ],
+      A: [
+        'Escrever histórias, letras de música, roteiros ou poesia.',
+        'Desenhar, pintar ou criar o visual de marcas e projetos.',
+        'Tocar, cantar, compor ou produzir música.',
+        'Atuar, dançar ou se apresentar diante de um público.',
+        'Fotografar, filmar e editar vídeos com estilo próprio.',
+        'Criar ou decorar espaços, roupas ou objetos para ficarem bonitos e únicos.',
+        'Inventar ideias originais, sem ter regras prontas para seguir.',
+      ],
+      S: [
+        'Ajudar alguém que está passando por um problema pessoal ou emocional.',
+        'Ensinar ou explicar uma matéria para quem tem dificuldade.',
+        'Cuidar de pessoas doentes ou que precisam de ajuda no dia a dia.',
+        'Participar de projetos de voluntariado ou de ação social na comunidade.',
+        'Acompanhar o desenvolvimento de crianças ou adolescentes.',
+        'Mediar uma briga e ajudar as pessoas a chegarem a um acordo.',
+        'Atender pessoas e fazer com que elas se sintam acolhidas.',
+      ],
+      E: [
+        'Montar um negócio próprio e correr atrás de clientes.',
+        'Convencer pessoas a apoiarem uma ideia ou comprarem um produto.',
+        'Liderar uma equipe e tomar as decisões difíceis.',
+        'Negociar preços, contratos ou parcerias.',
+        'Competir por metas e resultados, com ranking e premiação.',
+        'Apresentar um projeto para investidores ou diretores.',
+        'Organizar um evento ou uma campanha e fazer acontecer do zero.',
+      ],
+      C: [
+        'Organizar planilhas, arquivos e documentos para que tudo fique em ordem.',
+        'Cuidar das contas, do orçamento e dos registros financeiros de uma empresa.',
+        'Seguir um procedimento passo a passo, sem errar nada.',
+        'Conferir dados e documentos para achar erros e inconsistências.',
+        'Planejar agenda, estoque ou entregas para que nada falte.',
+        'Trabalhar com regras, normas e processos bem definidos.',
+        'Preencher, revisar e controlar cadastros, notas ou relatórios com cuidado.',
+      ],
+    },
+  },
+
+  /* 2. HABILIDADES (autoavaliação por tipo RIASEC) */
+  {
+    id: 'habilidades',
+    title: 'Habilidades',
+    kind: 'dims',
+    scale: 'competencia',
+    meta: RIASEC,
+    order: ['R', 'I', 'A', 'S', 'E', 'C'],
+    intro:
+      'Agora é sobre o que você faz bem hoje, e não sobre o que gostaria de fazer. Seja realista: nem modesto demais, nem exagerado.',
+    items: {
+      R: [
+        'Usar ferramentas, consertar coisas e entender como equipamentos funcionam.',
+        'Ter boa coordenação e habilidade com as mãos.',
+      ],
+      I: [
+        'Entender matemática e ciências e aplicar na prática.',
+        'Pesquisar, comparar informações e chegar a conclusões bem fundamentadas.',
+      ],
+      A: [
+        'Ter ideias originais e transformar em algo concreto, como texto, imagem, som ou vídeo.',
+        'Perceber o que é bonito e harmônico: cores, formas, ritmo, estilo.',
+      ],
+      S: [
+        'Escutar alguém com atenção e perceber o que a pessoa realmente sente.',
+        'Explicar algo difícil de um jeito que os outros entendem.',
+      ],
+      E: [
+        'Convencer pessoas e tomar a frente quando o grupo está parado.',
+        'Decidir e agir mesmo sem ter todas as informações.',
+      ],
+      C: [
+        'Manter tudo organizado e cumprir prazos sem precisar ser lembrado.',
+        'Cuidar dos detalhes e deixar passar poucos erros.',
+      ],
+    },
+  },
+
+  /* 3. JEITO DE SER (Big Five curto) */
+  {
+    id: 'jeito',
+    title: 'Jeito de ser',
+    kind: 'dims',
+    scale: 'concordo',
+    meta: BIG5,
+    order: ['E', 'A', 'C', 'S', 'O'],
+    intro:
+      'Como você costuma ser no dia a dia. Responda pelo que você é hoje, não pelo que gostaria de ser. O primeiro impulso costuma ser o mais honesto.',
+    items: {
+      E: [
+        'Fico à vontade em grupos e costumo puxar conversa.',
+        rev('Depois de um dia com muita gente, preciso ficar sozinho para recuperar a energia.'),
+        'Gosto de ser o centro das atenções de vez em quando.',
+      ],
+      A: [
+        'Me preocupo de verdade com o que as outras pessoas estão sentindo.',
+        rev('Os problemas dos outros costumam me afetar pouco.'),
+        'Sou paciente e gentil mesmo com quem me irrita.',
+      ],
+      C: [
+        'Gosto de deixar tudo planejado antes de começar algo.',
+        rev('Costumo deixar as tarefas para a última hora.'),
+        'Termino o que começo, mesmo quando perde a graça.',
+      ],
+      S: [
+        'Mantenho a calma em situações de pressão.',
+        rev('Fico ansioso ou preocupado com facilidade.'),
+        'Me recupero rápido depois de uma decepção ou de uma crítica.',
+      ],
+      O: [
+        'Gosto de conhecer ideias, culturas e jeitos de pensar bem diferentes do meu.',
+        rev('Prefiro fazer do jeito que já deu certo a testar coisas novas.'),
+        'Me empolgo com teorias, ideias abstratas e conversas profundas.',
+      ],
+    },
+  },
+
+  /* 4. VALORES (âncoras de carreira) */
+  {
+    id: 'valores',
+    title: 'O que importa',
+    kind: 'dims',
+    scale: 'importancia',
+    meta: VALORES,
+    order: ['autonomia', 'estabilidade', 'proposito', 'desafio', 'equilibrio', 'remuneracao', 'reconhecimento', 'criacao'],
+    intro:
+      'O que precisa existir num trabalho para ele valer a pena para você. Quase tudo parece importante, então tente ser seletivo: reserve o "essencial" para o que realmente não abre mão.',
+    items: {
+      autonomia: [
+        'Decidir sozinho como organizar meu tempo e meu jeito de trabalhar.',
+        'Não ter ninguém me vigiando a cada detalhe.',
+        'Poder escolher em quais projetos eu trabalho.',
+      ],
+      estabilidade: [
+        'Ter um emprego seguro, sem medo de ser mandado embora.',
+        'Receber um salário certo todo mês.',
+        'Saber o que esperar do meu futuro, com uma carreira previsível.',
+      ],
+      proposito: [
+        'Ajudar pessoas ou melhorar o mundo com o meu trabalho.',
+        'Sentir que o que faço tem significado, e não só paga as contas.',
+        'Contribuir com uma causa em que eu acredito.',
+      ],
+      desafio: [
+        'Enfrentar problemas difíceis que me obriguem a crescer.',
+        'Aprender coisas novas o tempo todo.',
+        'Sentir que estou sendo testado, e não entediado.',
+      ],
+      equilibrio: [
+        'Ter tempo de sobra para família, amigos e hobbies.',
+        'Ter flexibilidade de horário e de local.',
+        'Um trabalho que não invada minhas noites e fins de semana.',
+      ],
+      remuneracao: [
+        'Ganhar muito bem, mesmo que isso exija mais esforço.',
+        'Poder aumentar minha renda rápido quando entrego resultado.',
+        'Conseguir pagar o estilo de vida que eu quero.',
+      ],
+      reconhecimento: [
+        'Ser reconhecido e respeitado pelo que faço.',
+        'Ter um cargo ou título de prestígio.',
+        'Ser visto como referência no que faço.',
+      ],
+      criacao: [
+        'Criar algo meu, do meu jeito.',
+        'Ter o meu próprio negócio um dia.',
+        'Ter espaço para inovar e propor ideias novas.',
+      ],
+    },
+  },
+
+  /* 5. DIA A DIA (preferências de contexto, sem pontuação por dimensão) */
+  {
+    id: 'dia',
+    title: 'Dia a dia',
+    kind: 'list',
+    scale: 'concordo',
+    intro: 'Como você imagina o seu dia a dia de trabalho ideal. Aqui não existe certo: cada resposta ajuda a separar ambientes que combinam ou não com você.',
+    keys: ['remoto', 'startup', 'equipe', 'rotina', 'movimento', 'mudar'],
+    items: [
+      'Gosto da ideia de trabalhar de casa ou de qualquer lugar, sem ir a um escritório.',
+      'Prefiro um lugar pequeno e em construção, onde tudo muda, a uma empresa grande e organizada.',
+      'Rendo mais quando trabalho junto com outras pessoas do que quando trabalho sozinho.',
+      'Me sinto bem numa rotina previsível, em que eu sei o que vai acontecer em cada dia.',
+      'Prefiro um trabalho em que eu me movimento ou fico fora do escritório a ficar sentado o dia todo.',
+      'Eu toparia mudar de cidade ou de país por uma boa oportunidade.',
+    ],
+  },
+
+  /* 6. MOMENTO (maturidade da escolha, sem pontuação por dimensão) */
+  {
+    id: 'momento',
+    title: 'Seu momento',
+    kind: 'list',
+    scale: 'concordo',
+    intro: 'Como você está agora diante dessa escolha. Isso ajuda a análise a ser útil para o seu momento, e não só para o seu perfil.',
+    keys: ['certeza', 'pressao', 'conhece'],
+    items: [
+      'Hoje eu já tenho uma ideia clara do que quero seguir profissionalmente.',
+      'A pressão para escolher certo me deixa travado ou ansioso.',
+      'Sei bem o que as profissões que mais me atraem fazem no dia a dia.',
+    ],
+  },
+
+  /* 7. REFLEXÕES ABERTAS */
+  {
+    id: 'abertas',
+    title: 'Em suas palavras',
+    kind: 'open',
+    intro:
+      'Escreva do seu jeito. Poucas linhas já ajudam, e quanto mais você contar, mais personalizada fica a análise. Pode pular qualquer uma.',
+    items: [
+      {
+        id: 'flow',
+        t: 'Qual atividade faz o tempo passar sem você perceber? Pode ser estudo, jogo, trabalho, hobby, qualquer coisa.',
+        ph: 'Ex.: quando estou editando vídeo, olho o relógio e já passaram 4 horas...',
+      },
+      {
+        id: 'orgulho',
+        t: 'Conte algo que você fez (na escola, no trabalho, em casa ou com amigos) e do qual se orgulha. O que exatamente você fez?',
+        ph: 'Descreva a situação e o que foi a sua parte nela...',
+      },
+      {
+        id: 'nao_quer',
+        t: 'Que tipo de trabalho ou de dia a dia você NÃO quer de jeito nenhum?',
+        ph: 'Saber o que não quer é tão útil quanto saber o que quer...',
+      },
+      {
+        id: 'sonho',
+        t: 'Se pudesse escolher qualquer profissão, sem se preocupar com dinheiro, nota ou o que os outros vão pensar, qual seria e por quê?',
+        ph: 'Escreva sem filtro, mesmo que pareça maluco...',
+      },
+      {
+        id: 'pedem',
+        t: 'Para que as pessoas costumam te procurar quando precisam de ajuda ou de uma opinião?',
+        ph: 'Amigos, família, colegas: o que eles pedem a você?',
+      },
+      {
+        id: 'admira',
+        t: 'Quem você admira profissionalmente e o que dessa pessoa te atrai?',
+        ph: 'Pode ser alguém famoso, um parente, um professor...',
+      },
+      {
+        id: 'dez_anos',
+        t: 'Como seria um dia comum da sua vida daqui a 10 anos, se tudo desse certo?',
+        ph: 'Onde você acorda, com quem fala, o que faz, como termina o dia...',
+      },
+    ],
+    final: {
+      id: 'contexto_livre',
+      t: 'Tem algo que a gente precisa saber para te orientar melhor? Por exemplo: o que sua família espera, quanto dá para gastar com estudo, cidade onde você precisa ficar, cursos que já tentou ou largou, matérias de que gosta ou odeia.',
+      ph: 'Qualquer coisa que influencie a sua escolha...',
+    },
+  },
+];
+
+/* ---------- Versões do teste ----------
+   Os números são "perguntas por grupo" (por tipo ou por valor) nas seções por dimensão,
+   "quantas frases" nas seções em lista, e "quantas perguntas abertas" (além da última,
+   que é sempre incluída). Zero tira a seção inteira da versão. */
+const TIERS = {
+  rapido: {
+    nome: 'Rápido',
+    resumo: 'Uma primeira ideia',
+    desc: 'Para quem tem pouco tempo ou só quer um empurrão inicial. Mede interesses e valores principais.',
+    counts: { atividades: 3, habilidades: 0, jeito: 0, valores: 1, dia: 0, momento: 2, abertas: 1 },
+  },
+  equilibrado: {
+    nome: 'Equilibrado',
+    resumo: 'Recomendado',
+    desc: 'Interesses, habilidades, jeito de ser e valores. Bom para a maioria das pessoas.',
+    counts: { atividades: 4, habilidades: 1, jeito: 2, valores: 2, dia: 0, momento: 2, abertas: 3 },
+    recomendado: true,
+  },
+  completo: {
+    nome: 'Completo',
+    resumo: 'Para decidir com calma',
+    desc: 'Tudo do Equilibrado, com mais perguntas em cada área, o dia a dia que você quer e mais espaço para escrever. Ideal se você está em dúvida entre muitos caminhos.',
+    counts: { atividades: 7, habilidades: 2, jeito: 3, valores: 3, dia: 6, momento: 3, abertas: 7 },
+  },
+};
+
+/* ---------- Montagem do teste de uma versão ---------- */
+function buildTest(tierKey) {
+  const tier = TIERS[tierKey];
+  const sections = [];
+
+  SECTIONS.forEach((sec) => {
+    const n = tier.counts[sec.id] || 0;
+    if (!n) return;
+    const qs = [];
+
+    if (sec.kind === 'dims') {
+      // intercala os grupos (R, I, A, S, E, C, R, I, ...) para não repetir o assunto em sequência
+      for (let k = 0; k < n; k++) {
+        sec.order.forEach((dim) => {
+          const raw = sec.items[dim][k];
+          if (!raw) return;
+          qs.push({
+            id: `${sec.id}_${dim}_${k + 1}`,
+            section: sec.id,
+            dim,
+            text: raw.t || raw,
+            rev: !!raw.rev,
+            type: 'likert',
+            scale: sec.scale,
+          });
+        });
+      }
+    } else if (sec.kind === 'list') {
+      sec.items.slice(0, n).forEach((raw, k) => {
+        qs.push({
+          id: `${sec.id}_${sec.keys[k]}`,
+          section: sec.id,
+          dim: sec.keys[k],
+          text: raw,
+          rev: false,
+          type: 'likert',
+          scale: sec.scale,
+        });
+      });
+    } else if (sec.kind === 'open') {
+      sec.items.slice(0, n).concat([sec.final]).forEach((raw) => {
+        qs.push({
+          id: `aberta_${raw.id}`,
+          section: sec.id,
+          dim: raw.id,
+          text: raw.t,
+          placeholder: raw.ph,
+          type: 'open',
+        });
+      });
+    }
+
+    sections.push({
+      id: sec.id,
+      title: sec.title,
+      intro: sec.intro,
+      kind: sec.kind,
+      scale: sec.scale || null,
+      meta: sec.meta || null,
+      questions: qs,
+    });
+  });
+
+  let idx = 0;
+  const flat = [];
+  sections.forEach((s) => {
+    s.startIndex = idx;
+    s.questions.forEach((q) => {
+      q.index = idx++;
+      flat.push(q);
+    });
+  });
+
+  const totalLikert = flat.filter((q) => q.type === 'likert').length;
+  const totalOpen = flat.length - totalLikert;
+
+  return {
+    tier: tierKey,
+    meta: {
+      nome: tier.nome,
+      total: flat.length,
+      totalLikert,
+      totalOpen,
+      etapas: sections.length,
+      minMin: Math.round((totalLikert * 7 + totalOpen * 45) / 60),
+      minMax: Math.round((totalLikert * 10 + totalOpen * 100) / 60),
+    },
+    sections,
+    flat,
+  };
+}

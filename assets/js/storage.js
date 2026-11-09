@@ -1,41 +1,50 @@
-const STORAGE_KEY = 'vocacional_v1';
+const STORAGE_KEY = 'vocacional_v2';
+const LEGACY_KEYS = ['vocacional_v1'];
 
 const Storage = {
   save(state) {
     try {
       const data = {
+        tier: state.tier,
+        screen: state.screen,
+        si: state.si,
+        qi: state.qi,
+        personal: state.personal,
+        answers: state.answers,
         respondentId: state.respondentId,
         startTime: state.startTime,
+        endTime: state.endTime,
         savedAt: new Date().toISOString(),
-        personalData: state.personalData,
-        answers: state.answers,
-        currentPart: state.currentPart,
-        currentQuestion: state.currentQuestion,
-        screen: state.screen,
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     } catch (e) {
-      console.warn('Could not save to localStorage:', e);
+      /* modo privado ou armazenamento cheio: o teste segue funcionando, só não salva */
     }
   },
 
   load() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return null;
-      return JSON.parse(raw);
+      return raw ? JSON.parse(raw) : null;
     } catch (e) {
       return null;
     }
   },
 
   clear() {
-    localStorage.removeItem(STORAGE_KEY);
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (e) {}
+  },
+
+  clearLegacy() {
+    try {
+      LEGACY_KEYS.forEach((k) => localStorage.removeItem(k));
+    } catch (e) {}
   },
 
   hasProgress() {
-    const data = this.load();
-    if (!data) return false;
-    return data.answers && Object.keys(data.answers).length > 0;
-  }
+    const d = this.load();
+    return !!(d && d.tier && d.answers && Object.keys(d.answers).length > 0);
+  },
 };

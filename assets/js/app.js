@@ -1,807 +1,729 @@
-// ===== STATE =====
+/* =========================================================
+   APP
+   Telas: intro -> personal -> section (intro da etapa) -> question -> result
+   Os cliques usam data-action (delegação de eventos), sem onclick no HTML.
+   ========================================================= */
+
+const CHATGPT_URL = 'https://chatgpt.com/';
+
+const MOMENTOS = {
+  ensino_medio: 'Estou no ensino médio',
+  pre_vestibular: 'Estou me preparando para o vestibular ou Enem',
+  faculdade: 'Estou na faculdade ou em curso técnico',
+  trabalhando_mudar: 'Já trabalho e quero crescer ou mudar de área',
+  sem_trabalho: 'Estou sem trabalho e quero me recolocar',
+  outro: 'Outro momento',
+};
+
 const state = {
-  screen: 'intro',         // intro | personal | part-intro | question | complete
-  currentPart: 0,
-  currentQuestion: 0,
-  showingPartIntro: false,
-  personalData: {},
+  screen: 'intro', // intro | personal | section | question | result
+  tier: 'equilibrado',
+  si: 0, // índice da seção
+  qi: 0, // índice da pergunta dentro da seção
+  personal: {},
   answers: {},
   respondentId: null,
   startTime: null,
-  direction: 'forward',    // forward | backward
+  endTime: null,
 };
 
-const MOTIVATIONAL = [
-  'Cada resposta revela uma camada de quem você é.',
-  'Não existe resposta errada. Só existe a sua verdade.',
-  'Você está construindo autoconhecimento com cada clique.',
-  'A clareza profissional começa com honestidade consigo mesmo.',
-  'Continue. Cada pergunta importa.',
-  'Você está no caminho certo.',
-  'Suas respostas estão formando um retrato único de você.',
-  'Autoconhecimento é o maior ativo de uma carreira.',
-];
+let plan = null;
+let advanceTimer = null;
+let promptText = '';
+const PLANS = {};
 
-// ===== INIT =====
+/* ---------- utilidades ---------- */
+const $ = (sel, root = document) => root.querySelector(sel);
+const appEl = () => document.getElementById('app');
+
+function getPlan(tier) {
+  if (!PLANS[tier]) PLANS[tier] = buildTest(tier);
+  return PLANS[tier];
+}
+
+function esc(str) {
+  return String(str === null || str === undefined ? '' : str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function render(html) {
+  clearTimeout(advanceTimer);
+  const el = appEl();
+  el.innerHTML = html;
+  window.scrollTo(0, 0);
+}
+
+function persist() {
+  Storage.save(state);
+}
+
+function currentSection() {
+  return plan.sections[state.si];
+}
+function currentQuestion() {
+  return currentSection().questions[state.qi];
+}
+
+const ICON = {
+  arrow: '<svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3 9h12M10 4l5 5-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  back: '<svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M12 4l-6 6 6 6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  check: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  copy: '<svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><rect x="6" y="6" width="9" height="9" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M12 6V4.5A1.5 1.5 0 0010.5 3h-6A1.5 1.5 0 003 4.5v6A1.5 1.5 0 004.5 12H6" stroke="currentColor" stroke-width="1.7"/></svg>',
+  external: '<svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M8 4H5a2 2 0 00-2 2v7a2 2 0 002 2h7a2 2 0 002-2v-3M11 3h4v4M15 3l-6 6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+};
+
+/* ---------- inicialização ---------- */
 document.addEventListener('DOMContentLoaded', init);
 
 function init() {
-  const app = document.getElementById('app');
+  Storage.clearLegacy();
+  appEl().addEventListener('click', onClick);
+  appEl().addEventListener('input', onInput);
+  document.addEventListener('keydown', onKey);
 
-  // Check for saved progress
-  if (Storage.hasProgress()) {
-    const saved = Storage.load();
-    if (saved && saved.screen !== 'complete') {
-      showResumePrompt(saved);
-      return;
+  const saved = Storage.load();
+  if (saved && saved.tier && TIERS[saved.tier] && saved.answers && Object.keys(saved.answers).length > 0) {
+    if (saved.screen === 'result') {
+      restore(saved);
+      return renderResult();
     }
+    return renderResume(saved);
   }
+  renderIntro();
+}
 
-  renderIntro(app);
-  setupKeyboard();
+function restore(saved) {
+  Object.assign(state, {
+    screen: saved.screen,
+    tier: saved.tier,
+    si: saved.si || 0,
+    qi: saved.qi || 0,
+    personal: saved.personal || {},
+    answers: saved.answers || {},
+    respondentId: saved.respondentId,
+    startTime: saved.startTime,
+    endTime: saved.endTime,
+  });
+  plan = getPlan(state.tier);
+  if (state.si >= plan.sections.length) state.si = 0;
+  if (state.qi >= currentSection().questions.length) state.qi = 0;
 }
 
 function generateId() {
   return 'R' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).slice(2, 5).toUpperCase();
 }
 
-// ===== SCREEN TRANSITIONS =====
-function transitionTo(renderFn) {
-  const app = document.getElementById('app');
-  app.style.opacity = '0';
-  app.style.transform = 'translateY(6px)';
-  app.style.transition = 'opacity 220ms ease, transform 220ms ease';
-  setTimeout(() => {
-    app.style.opacity = '';
-    app.style.transform = '';
-    app.style.transition = '';
-    renderFn(app);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, 230);
-}
-
-// ===== RESUME PROMPT =====
-function showResumePrompt(saved) {
-  const app = document.getElementById('app');
-  const answeredCount = Object.keys(saved.answers || {}).length;
-  const pct = Math.round((answeredCount / QUESTIONS.total) * 100);
-
-  app.innerHTML = `
-    <div class="intro-screen">
-      <div class="intro-bg"></div>
-      <div class="intro-content">
-        <div class="resume-card">
-          <div class="resume-card-header">
-            <div class="resume-card-icon">💾</div>
-            <div>
-              <div class="resume-card-title">Progresso salvo</div>
-              <div class="resume-card-subtitle">${pct}% concluído · ${answeredCount} respostas</div>
-            </div>
-          </div>
-          <div class="resume-card-body">
-            Encontramos seu progresso anterior. Deseja continuar de onde parou?
-          </div>
-          <div class="resume-actions">
-            <button class="btn-primary" onclick="resumeSession()" style="font-size:13px;padding:10px 20px">
-              Continuar
-            </button>
-            <button class="btn-secondary" onclick="startFresh()" style="font-size:13px;padding:10px 20px">
-              Começar do zero
-            </button>
-          </div>
+/* ---------- retomar ---------- */
+function renderResume(saved) {
+  const p = getPlan(saved.tier);
+  const done = Object.keys(saved.answers).length;
+  const pct = Math.min(100, Math.round((done / p.meta.total) * 100));
+  render(`
+    <div class="page fade">
+      <div class="brand">Teste Vocacional</div>
+      <div class="card resume">
+        <h1 class="h2">Você tem um teste em andamento</h1>
+        <p class="muted">Versão ${esc(p.meta.nome)}, ${pct}% respondido${saved.personal && saved.personal.nome ? ' por ' + esc(saved.personal.nome) : ''}. Quer continuar de onde parou?</p>
+        <div class="stack">
+          <button class="btn btn-primary btn-block" data-action="resume">Continuar</button>
+          <button class="btn btn-ghost btn-block" data-action="fresh">Começar do zero</button>
         </div>
-        <div class="intro-badge">
-          <span class="intro-badge-dot"></span>
-          Plataforma Vocacional
-        </div>
-        <h1 class="intro-headline">Descubra quem<br>você <span>realmente é</span>.</h1>
-        <p class="intro-subtitle">
-          Uma experiência de autoconhecimento profissional profunda, desenvolvida para revelar seus talentos e direção de carreira.
-        </p>
       </div>
     </div>
-  `;
+  `);
 }
 
-window.resumeSession = function() {
-  const saved = Storage.load();
-  Object.assign(state, {
-    respondentId: saved.respondentId,
-    startTime: saved.startTime,
-    personalData: saved.personalData || {},
-    answers: saved.answers || {},
-    currentPart: saved.currentPart || 0,
-    currentQuestion: saved.currentQuestion || 0,
-    screen: saved.screen || 'question',
-    showingPartIntro: false,
-  });
-  const app = document.getElementById('app');
-  setupKeyboard();
-  if (state.screen === 'complete') {
-    renderComplete(app);
-  } else {
-    renderQuestion(app);
-  }
-};
+/* ---------- intro ---------- */
+function includesLine(tierKey) {
+  const names = { atividades: 'interesses', habilidades: 'habilidades', jeito: 'jeito de ser', valores: 'valores', dia: 'dia a dia', momento: 'seu momento', abertas: 'perguntas escritas' };
+  return Object.keys(names)
+    .filter((k) => TIERS[tierKey].counts[k] > 0)
+    .map((k) => names[k])
+    .join(', ');
+}
 
-window.startFresh = function() {
-  Storage.clear();
-  const app = document.getElementById('app');
-  renderIntro(app);
-};
-
-// ===== INTRO SCREEN =====
-function renderIntro(app) {
+function renderIntro() {
   state.screen = 'intro';
-  const totalQ = QUESTIONS.total;
-  const likertQ = QUESTIONS.totalLikert;
-  const openQ = QUESTIONS.totalOpen;
+  const tiers = Object.keys(TIERS).map((k) => ({ k, t: TIERS[k], m: getPlan(k).meta }));
 
-  app.innerHTML = `
-    <div class="intro-screen stagger">
-      <div class="intro-bg"></div>
-      <div class="intro-content">
-        <div class="intro-badge">
-          <span class="intro-badge-dot"></span>
-          Plataforma Vocacional
+  render(`
+    <div class="page fade">
+      <div class="brand">Teste Vocacional</div>
+
+      <h1 class="h1">Descubra quais carreiras combinam com você</h1>
+      <p class="lead">Você responde perguntas simples e, no final, recebe um texto pronto para colar no ChatGPT. Ele devolve uma análise completa do seu perfil, com profissões, cursos e um plano para testar antes de decidir.</p>
+
+      <section class="how" aria-labelledby="how-title">
+        <h2 class="h3" id="how-title">Como funciona</h2>
+        <ol class="how-list">
+          <li><span class="how-n">1</span><span><strong>Escolha o tamanho.</strong> Rápido, Equilibrado ou Completo. Quanto mais perguntas, mais precisa fica a análise.</span></li>
+          <li><span class="how-n">2</span><span><strong>Responda com sinceridade.</strong> Não existe resposta certa. Vale o primeiro impulso.</span></li>
+          <li><span class="how-n">3</span><span><strong>Copie o texto final.</strong> No fim, um botão copia tudo para você.</span></li>
+          <li><span class="how-n">4</span><span><strong>Cole no ChatGPT e envie.</strong> A versão gratuita já resolve. A análise sai em segundos.</span></li>
+        </ol>
+      </section>
+
+      <section aria-labelledby="tier-title">
+        <h2 class="h3" id="tier-title">Escolha o tamanho do teste</h2>
+        <div class="tiers" role="radiogroup" aria-labelledby="tier-title">
+          ${tiers
+            .map(
+              ({ k, t, m }) => `
+            <button type="button" class="tier ${state.tier === k ? 'sel' : ''}" role="radio" aria-checked="${state.tier === k}" data-action="tier" data-tier="${k}">
+              <span class="tier-dot" aria-hidden="true"></span>
+              <span class="tier-body">
+                <span class="tier-head">
+                  <span class="tier-name">${esc(t.nome)}</span>
+                  ${t.recomendado ? '<span class="tier-flag">Recomendado</span>' : ''}
+                </span>
+                <span class="tier-meta">${m.total} perguntas &middot; ${m.minMin} a ${m.minMax} min</span>
+                <span class="tier-desc">${esc(t.desc)}</span>
+                <span class="tier-inc">Mede: ${esc(includesLine(k))}.</span>
+              </span>
+            </button>`
+            )
+            .join('')}
         </div>
-        <h1 class="intro-headline">
-          Descubra quem<br>você <span>realmente é</span>.
-        </h1>
-        <p class="intro-subtitle">
-          Uma experiência de autoconhecimento profissional profunda — desenvolvida para revelar seus talentos únicos, valores e direção de carreira com clareza.
-        </p>
-        <div class="intro-stats">
-          <div class="intro-stat">
-            <span class="intro-stat-number">${totalQ}</span>
-            <span class="intro-stat-label">Perguntas</span>
-          </div>
-          <div class="intro-stat-divider"></div>
-          <div class="intro-stat">
-            <span class="intro-stat-number">${QUESTIONS.parts.length}</span>
-            <span class="intro-stat-label">Etapas</span>
-          </div>
-          <div class="intro-stat-divider"></div>
-          <div class="intro-stat">
-            <span class="intro-stat-number">~20</span>
-            <span class="intro-stat-label">Minutos</span>
-          </div>
-        </div>
-        <button class="btn-primary" onclick="startPersonal()">
-          Começar agora
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-        <p class="intro-note">
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1a5 5 0 100 10A5 5 0 006 1zM6 4v3l2 1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-          Suas respostas são salvas automaticamente neste dispositivo
-        </p>
+      </section>
+
+      <p class="privacy">Suas respostas ficam só neste aparelho e nada é enviado para nenhum servidor. O texto só chega ao ChatGPT quando você mesmo colar lá.</p>
+
+      <div class="actionbar">
+        <button class="btn btn-primary btn-block" data-action="to-personal">Continuar ${ICON.arrow}</button>
       </div>
     </div>
-  `;
+  `);
 }
 
-window.startPersonal = function() {
-  transitionTo(renderPersonal);
-};
-
-// ===== PERSONAL DATA SCREEN =====
-function renderPersonal(app) {
+/* ---------- dados pessoais ---------- */
+function renderPersonal() {
   state.screen = 'personal';
+  const p = state.personal;
+  render(`
+    <div class="page fade">
+      <div class="topline">
+        <button class="icon-btn" data-action="to-intro" aria-label="Voltar">${ICON.back}</button>
+        <span class="topline-text">Antes de começar</span>
+      </div>
 
-  app.innerHTML = `
-    <div class="personal-screen">
-      <div class="container container--narrow">
-        <div class="form-card anim-fade-in-up">
-          <div class="form-header">
-            <div class="form-step-label">Etapa 1 de ${QUESTIONS.parts.length + 2}</div>
-            <h2 class="form-title">Antes de começar</h2>
-            <p class="form-subtitle">Precisamos de algumas informações básicas sobre você.</p>
-          </div>
-          <div class="form-grid">
-            <div class="field">
-              <label class="field-label" for="nome">
-                Nome <span class="field-label-required">*</span>
-              </label>
-              <input
-                class="field-input"
-                type="text"
-                id="nome"
-                placeholder="Seu nome completo"
-                autocomplete="given-name"
-                value="${escapeHtml(state.personalData.nome || '')}"
-              />
-            </div>
-            <div class="form-grid form-grid-2">
-              <div class="field">
-                <label class="field-label" for="idade">
-                  Idade <span class="field-label-required">*</span>
-                </label>
-                <input
-                  class="field-input"
-                  type="number"
-                  id="idade"
-                  placeholder="Ex: 22"
-                  min="12"
-                  max="80"
-                  value="${state.personalData.idade || ''}"
-                />
-              </div>
-              <div class="field">
-                <label class="field-label" for="genero">
-                  Gênero
-                  <span class="field-label-optional">opcional</span>
-                </label>
-                <select class="field-input" id="genero">
-                  <option value="">Prefiro não dizer</option>
-                  <option value="feminino" ${state.personalData.genero === 'feminino' ? 'selected' : ''}>Feminino</option>
-                  <option value="masculino" ${state.personalData.genero === 'masculino' ? 'selected' : ''}>Masculino</option>
-                  <option value="nao-binario" ${state.personalData.genero === 'nao-binario' ? 'selected' : ''}>Não-binário</option>
-                  <option value="outro" ${state.personalData.genero === 'outro' ? 'selected' : ''}>Outro</option>
-                </select>
-              </div>
-            </div>
-            <div class="field">
-              <label class="field-label" for="cidade">
-                Cidade
-                <span class="field-label-optional">opcional</span>
-              </label>
-              <input
-                class="field-input"
-                type="text"
-                id="cidade"
-                placeholder="Ex: São Paulo, SP"
-                autocomplete="address-level2"
-                value="${escapeHtml(state.personalData.cidade || '')}"
-              />
-            </div>
-          </div>
-          <div class="form-footer">
-            <span class="form-footer-note">
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1a5 5 0 100 10A5 5 0 006 1zm0 4v3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="6" cy="3.5" r="0.5" fill="currentColor"/></svg>
-              Dados usados apenas para identificação no CSV
-            </span>
-            <button class="btn-primary" onclick="submitPersonal()">
-              Iniciar teste
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </button>
-          </div>
+      <h1 class="h2">Um pouco sobre você</h1>
+      <p class="muted">Essas informações ajudam a análise a falar a sua língua e a respeitar o seu momento.</p>
+
+      <form class="form" data-form="personal" novalidate>
+        <div class="field">
+          <label for="nome">Como podemos te chamar?</label>
+          <input id="nome" name="nome" type="text" autocomplete="given-name" enterkeyhint="next" placeholder="Só o primeiro nome" maxlength="40" value="${esc(p.nome || '')}" />
+          <p class="field-error" id="err-nome" hidden>Informe seu primeiro nome.</p>
         </div>
+        <div class="field">
+          <label for="idade">Idade</label>
+          <input id="idade" name="idade" type="number" inputmode="numeric" enterkeyhint="next" min="12" max="80" placeholder="Ex.: 17" value="${esc(p.idade || '')}" />
+          <p class="field-error" id="err-idade" hidden>Informe uma idade entre 12 e 80.</p>
+        </div>
+        <div class="field">
+          <label for="momento">Seu momento</label>
+          <select id="momento" name="momento">
+            <option value="">Selecione</option>
+            ${Object.keys(MOMENTOS)
+              .map((k) => `<option value="${k}" ${p.momento === k ? 'selected' : ''}>${esc(MOMENTOS[k])}</option>`)
+              .join('')}
+          </select>
+          <p class="field-error" id="err-momento" hidden>Escolha a opção que mais se parece com você.</p>
+        </div>
+        <div class="field">
+          <label for="cidade">Cidade e estado <span class="opt-tag">opcional</span></label>
+          <input id="cidade" name="cidade" type="text" autocomplete="address-level2" enterkeyhint="done" placeholder="Ex.: Goiânia, GO" maxlength="60" value="${esc(p.cidade || '')}" />
+        </div>
+      </form>
+
+      <div class="actionbar">
+        <button class="btn btn-primary btn-block" data-action="submit-personal">Começar o teste ${ICON.arrow}</button>
       </div>
     </div>
-  `;
-
-  document.getElementById('nome').focus();
-
-  // Enter key on fields
-  ['nome','idade','cidade'].forEach(id => {
-    document.getElementById(id).addEventListener('keydown', e => {
-      if (e.key === 'Enter') submitPersonal();
-    });
-  });
+  `);
 }
 
-window.submitPersonal = function() {
-  const nome = document.getElementById('nome').value.trim();
-  const idade = document.getElementById('idade').value.trim();
+function submitPersonal() {
+  const nome = $('#nome').value.trim();
+  const idadeRaw = $('#idade').value.trim();
+  const idade = Number(idadeRaw);
+  const momento = $('#momento').value;
+  const cidade = $('#cidade').value.trim();
 
-  if (!nome) {
-    shakeField('nome');
+  const checks = [
+    ['nome', !nome],
+    ['idade', !idadeRaw || isNaN(idade) || idade < 12 || idade > 80],
+    ['momento', !momento],
+  ];
+  let firstBad = null;
+  checks.forEach(([id, bad]) => {
+    $('#err-' + id).hidden = !bad;
+    $('#' + id).classList.toggle('invalid', bad);
+    if (bad && !firstBad) firstBad = id;
+  });
+  if (firstBad) {
+    $('#' + firstBad).focus();
     return;
   }
-  if (!idade || isNaN(idade) || Number(idade) < 12 || Number(idade) > 80) {
-    shakeField('idade');
-    return;
-  }
 
-  state.personalData = {
-    nome,
-    idade: Number(idade),
-    genero: document.getElementById('genero').value,
-    cidade: document.getElementById('cidade').value.trim(),
-  };
-
+  state.personal = { nome, idade, momento, momentoLabel: MOMENTOS[momento], cidade };
+  state.answers = {};
   state.respondentId = generateId();
   state.startTime = new Date().toISOString();
-  state.currentPart = 0;
-  state.currentQuestion = 0;
-  state.showingPartIntro = true;
-
-  Storage.save(state);
-  transitionTo(renderPartIntro);
-};
-
-function shakeField(id) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.style.animation = 'none';
-  el.getBoundingClientRect();
-  el.style.animation = 'shake 400ms cubic-bezier(0.36, 0.07, 0.19, 0.97)';
-  el.focus();
-  if (!document.getElementById('shake-style')) {
-    const s = document.createElement('style');
-    s.id = 'shake-style';
-    s.textContent = '@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}';
-    document.head.appendChild(s);
-  }
+  state.endTime = null;
+  state.si = 0;
+  state.qi = 0;
+  plan = getPlan(state.tier);
+  renderSectionIntro();
 }
 
-// ===== PART INTRO SCREEN =====
-function renderPartIntro(app) {
-  state.showingPartIntro = true;
-  const part = QUESTIONS.parts[state.currentPart];
-  const overallProgress = calculateProgress();
+/* ---------- abertura de etapa ---------- */
+function progressPct() {
+  const q = state.screen === 'section' ? currentSection().questions[0] : currentQuestion();
+  return Math.round((q.index / plan.meta.total) * 100);
+}
 
-  app.innerHTML = `
-    ${renderProgressBar(overallProgress, 'Etapa ' + (state.currentPart + 1) + ': ' + part.title)}
-    <div class="part-intro" style="padding-top:100px">
-      <div class="part-intro-card stagger">
-        <span class="part-emoji anim-float">${part.emoji}</span>
-        <div class="part-number" style="color:${part.color}">
-          Etapa ${state.currentPart + 1} de ${QUESTIONS.parts.length}
-        </div>
-        <h2 class="part-intro-title">${part.title}</h2>
-        <p class="part-intro-subtitle">${part.subtitle}</p>
-        <p class="part-intro-description">${part.intro}</p>
-        <div class="part-intro-meta">
-          <span class="part-meta-pill">
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1a5 5 0 100 10A5 5 0 006 1zm0 4v3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-            ${part.questions.length} ${part.questions[0].type === 'open' ? 'reflexões' : 'afirmações'}
-          </span>
-          <span class="part-meta-pill">
-            ${part.questions[0].type === 'likert' ? '⚡ Escala 1–5' : '✍️ Texto livre'}
-          </span>
-        </div>
-        <button class="btn-primary" onclick="startPart()" style="background:${part.color}">
-          Começar
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
+function renderSectionIntro() {
+  state.screen = 'section';
+  const sec = currentSection();
+  const sc = sec.scale ? SCALES[sec.scale] : null;
+  const n = sec.questions.length;
+  persist();
+
+  render(`
+    <div class="page fade">
+      <div class="progress" aria-hidden="true"><div class="progress-fill" style="width:${progressPct()}%"></div></div>
+      <div class="topline">
+        <button class="icon-btn" data-action="${state.si === 0 ? 'to-personal' : 'back-from-section'}" aria-label="Voltar">${ICON.back}</button>
+        <span class="topline-text">Etapa ${state.si + 1} de ${plan.sections.length}</span>
+      </div>
+
+      <h1 class="h1 section-title">${esc(sec.title)}</h1>
+      <p class="lead">${esc(sec.intro)}</p>
+
+      ${
+        sc
+          ? `<div class="scale-box">
+              <p class="scale-ask">${esc(sc.ask)}</p>
+              <ol class="scale-list">
+                ${sc.labels.map((l, i) => `<li><span class="scale-n">${i + 1}</span>${esc(l)}</li>`).join('')}
+              </ol>
+            </div>`
+          : `<div class="scale-box"><p class="scale-ask">Resposta livre, no seu ritmo.</p></div>`
+      }
+
+      <p class="muted center">${n} ${sec.kind === 'open' ? (n === 1 ? 'pergunta' : 'perguntas') : n === 1 ? 'frase' : 'frases'} nesta etapa</p>
+
+      <div class="actionbar">
+        <button class="btn btn-primary btn-block" data-action="start-section">Começar ${ICON.arrow}</button>
       </div>
     </div>
-  `;
+  `);
 }
 
-window.startPart = function() {
-  state.showingPartIntro = false;
-  state.currentQuestion = 0;
-  transitionTo(renderQuestion);
-};
-
-// ===== QUESTION SCREEN =====
-function renderQuestion(app) {
+/* ---------- pergunta ---------- */
+function renderQuestion() {
   state.screen = 'question';
-  const part = QUESTIONS.parts[state.currentPart];
-  const question = part.questions[state.currentQuestion];
-  const overallProgress = calculateProgress();
-  const currentAnswer = state.answers[question.id];
-  const isAnswered = currentAnswer !== undefined && currentAnswer !== '';
+  const sec = currentSection();
+  const q = currentQuestion();
+  persist();
 
-  const isLastQuestion = state.currentQuestion === part.questions.length - 1;
-  const isLastPart = state.currentPart === QUESTIONS.parts.length - 1;
+  const head = `
+    <div class="qhead">
+      <div class="progress" aria-hidden="true"><div class="progress-fill" style="width:${progressPct()}%"></div></div>
+      <div class="qhead-row">
+        <button class="icon-btn" data-action="prev" aria-label="Pergunta anterior">${ICON.back}</button>
+        <span class="qhead-sec">${esc(sec.title)}</span>
+        <span class="qhead-count">${q.index + 1} de ${plan.meta.total}</span>
+      </div>
+    </div>`;
 
-  app.innerHTML = `
-    ${renderProgressBar(overallProgress, part.title)}
-    <div class="question-screen">
-      <main class="question-main">
-        <div class="question-wrap" id="question-wrap">
-          <div class="question-meta">
-            <span class="question-part-badge" style="background:${part.colorLight};color:${part.color}">
-              ${part.emoji} ${part.title}
-            </span>
-            <span class="question-number">
-              ${state.currentQuestion + 1} / ${part.questions.length}
-            </span>
+  if (q.type === 'likert') {
+    const sc = SCALES[q.scale];
+    const cur = state.answers[q.id];
+    render(`
+      <div class="page fade page-q">
+        ${head}
+        <main class="qmain">
+          <p class="q-ask">${esc(sc.ask)}</p>
+          <h1 class="q-text">${esc(q.text)}</h1>
+          <div class="options" role="radiogroup" aria-label="${esc(sc.ask)}">
+            ${sc.labels
+              .map(
+                (label, i) => `
+              <button type="button" class="opt ${cur === i + 1 ? 'sel' : ''}" role="radio" aria-checked="${cur === i + 1}" data-action="answer" data-value="${i + 1}">
+                <span class="opt-num">${i + 1}</span>
+                <span class="opt-label">${esc(label)}</span>
+              </button>`
+              )
+              .join('')}
           </div>
-
-          ${question.type === 'likert'
-            ? renderLikertQuestion(question, currentAnswer, part)
-            : renderOpenQuestion(question, currentAnswer, part)
-          }
-
-          <div class="question-nav">
-            <div class="nav-left">
-              ${(state.currentPart > 0 || state.currentQuestion > 0) ? `
-                <button class="btn-icon" onclick="prevQuestion()" title="Voltar" aria-label="Pergunta anterior">
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </button>
-              ` : '<div></div>'}
-            </div>
-            <div class="parts-dots">
-              ${QUESTIONS.parts.map((p, i) => `
-                <div class="part-dot ${i < state.currentPart ? 'done' : i === state.currentPart ? 'active' : ''}"
-                     title="${p.title}"></div>
-              `).join('')}
-            </div>
-            <div class="nav-right">
-              <button
-                class="btn-next ${isAnswered ? '' : question.type === 'open' ? '' : 'disabled-look'}"
-                id="btn-next"
-                onclick="nextQuestion()"
-                ${question.type === 'likert' && !isAnswered ? 'disabled' : ''}
-              >
-                ${isLastQuestion && isLastPart ? 'Concluir' :
-                  isLastQuestion ? 'Próxima etapa' : 'Próxima'}
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </button>
-            </div>
-          </div>
-
-          ${question.type === 'likert' ? `
-            <div class="keyboard-hint">
-              <span class="key-badge">1</span>–<span class="key-badge">5</span>
-              para responder &nbsp;·&nbsp;
-              <span class="key-badge">→</span>
-              para avançar
-            </div>
-          ` : ''}
-        </div>
-      </main>
-    </div>
-    <div id="answer-feedback" class="answer-feedback"></div>
-  `;
-
-  // Animate in
-  const wrap = document.getElementById('question-wrap');
-  if (wrap) {
-    wrap.style.opacity = '0';
-    wrap.style.transform = state.direction === 'forward' ? 'translateX(30px)' : 'translateX(-30px)';
-    wrap.style.transition = 'none';
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        wrap.style.transition = 'opacity 350ms ease, transform 350ms cubic-bezier(0.4, 0, 0.2, 1)';
-        wrap.style.opacity = '1';
-        wrap.style.transform = 'translateX(0)';
-      });
-    });
-  }
-
-  // Motivational text
-  showMotivational();
-
-  // Auto-focus textarea for open questions
-  if (question.type === 'open') {
-    setTimeout(() => {
-      const ta = document.getElementById('open-answer');
-      if (ta) ta.focus();
-    }, 400);
-  }
-
-  Storage.save(state);
-}
-
-function renderLikertQuestion(question, currentAnswer, part) {
-  const labels = ['Discordo totalmente', 'Discordo', 'Neutro', 'Concordo', 'Concordo totalmente'];
-  const emojis = ['😟', '🙁', '😐', '🙂', '😊'];
-
-  return `
-    <div>
-      <h2 class="question-text">${question.text}</h2>
-      <div class="likert-wrap">
-        <div class="likert-labels">
-          <span class="likert-label">Discordo<br>totalmente</span>
-          <span class="likert-label">Concordo<br>totalmente</span>
-        </div>
-        <div class="likert-options" role="radiogroup" aria-label="Escala de concordância">
-          ${[1,2,3,4,5].map(n => `
-            <button
-              class="likert-btn ripple-container ${currentAnswer == n ? 'selected' : ''}"
-              data-value="${n}"
-              onclick="handleLikert(${n})"
-              aria-label="${labels[n-1]}"
-              role="radio"
-              aria-checked="${currentAnswer == n ? 'true' : 'false'}"
-              title="${labels[n-1]}"
-            >
-              <span class="likert-num">${n}</span>
-              <span class="likert-dot"></span>
-            </button>
-          `).join('')}
-        </div>
-        <div class="likert-emoji-row">
-          <span>${emojis[0]}</span>
-          <span>${emojis[2]}</span>
-          <span>${emojis[4]}</span>
-        </div>
+        </main>
       </div>
-    </div>
-  `;
-}
-
-function renderOpenQuestion(question, currentAnswer, part) {
-  return `
-    <div class="open-question-wrap">
-      <h2 class="question-text">${question.text}</h2>
-      <div class="open-reflection-hint">
-        ✨ Esta é uma pergunta aberta. Responda com honestidade e profundidade — não há julgamento aqui.
-      </div>
-      <textarea
-        class="open-textarea"
-        id="open-answer"
-        placeholder="${question.placeholder || 'Escreva livremente...'}"
-        maxlength="2000"
-        rows="5"
-        oninput="handleOpen(this)"
-      >${currentAnswer || ''}</textarea>
-      <div class="open-textarea-footer">
-        <span class="open-char-count" id="char-count">${(currentAnswer || '').length} / 2000</span>
-        <span class="open-skip-note">Pode deixar em branco se preferir</span>
-      </div>
-    </div>
-  `;
-}
-
-// ===== ANSWER HANDLERS =====
-window.handleLikert = function(value) {
-  const part = QUESTIONS.parts[state.currentPart];
-  const question = part.questions[state.currentQuestion];
-
-  state.answers[question.id] = value;
-
-  // Update UI
-  document.querySelectorAll('.likert-btn').forEach(btn => {
-    const v = parseInt(btn.dataset.value);
-    btn.classList.toggle('selected', v === value);
-    btn.setAttribute('aria-checked', v === value ? 'true' : 'false');
-  });
-
-  // Enable next button
-  const btnNext = document.getElementById('btn-next');
-  if (btnNext) {
-    btnNext.disabled = false;
-    btnNext.classList.remove('disabled-look');
-  }
-
-  // Ripple effect
-  const selectedBtn = document.querySelector(`.likert-btn[data-value="${value}"]`);
-  if (selectedBtn) addRipple(selectedBtn);
-
-  Storage.save(state);
-
-  // Auto-advance after short delay for Likert
-  setTimeout(() => {
-    const current = state.answers[question.id];
-    if (current === value) {
-      nextQuestion();
-    }
-  }, 320);
-};
-
-window.handleOpen = function(textarea) {
-  const part = QUESTIONS.parts[state.currentPart];
-  const question = part.questions[state.currentQuestion];
-  const val = textarea.value;
-  state.answers[question.id] = val;
-
-  const counter = document.getElementById('char-count');
-  if (counter) counter.textContent = `${val.length} / 2000`;
-
-  const btnNext = document.getElementById('btn-next');
-  if (btnNext) btnNext.disabled = false;
-
-  Storage.save(state);
-};
-
-// ===== NAVIGATION =====
-window.nextQuestion = function() {
-  const part = QUESTIONS.parts[state.currentPart];
-  const question = part.questions[state.currentQuestion];
-
-  // Save open answer
-  if (question.type === 'open') {
-    const ta = document.getElementById('open-answer');
-    if (ta) state.answers[question.id] = ta.value;
-  }
-
-  state.direction = 'forward';
-
-  if (state.currentQuestion < part.questions.length - 1) {
-    // Next question in same part
-    state.currentQuestion++;
-    transitionTo(renderQuestion);
-  } else if (state.currentPart < QUESTIONS.parts.length - 1) {
-    // Move to next part
-    state.currentPart++;
-    state.showingPartIntro = true;
-    transitionTo(renderPartIntro);
+    `);
   } else {
-    // All done!
-    transitionTo(renderComplete);
+    const cur = state.answers[q.id] || '';
+    const isLast = q.index === plan.meta.total - 1;
+    render(`
+      <div class="page fade page-q">
+        ${head}
+        <main class="qmain">
+          <p class="q-ask">Pergunta escrita &middot; pode pular</p>
+          <h1 class="q-text q-text-open">${esc(q.text)}</h1>
+          <textarea id="open-answer" class="textarea" rows="6" maxlength="1500" placeholder="${esc(q.placeholder || 'Escreva livremente...')}" aria-label="Sua resposta"></textarea>
+          <p class="counter" id="counter">0 / 1500</p>
+        </main>
+        <div class="actionbar">
+          <button class="btn btn-primary btn-block" id="open-next" data-action="open-next">${cur.trim() ? 'Continuar' : 'Pular'} ${ICON.arrow}</button>
+        </div>
+      </div>
+    `);
+    const ta = $('#open-answer');
+    ta.value = cur;
+    updateCounter(ta);
+    // no celular, abrir o teclado sozinho esconde a pergunta
+    if (window.matchMedia && window.matchMedia('(pointer: fine)').matches) ta.focus();
   }
-};
-
-window.prevQuestion = function() {
-  state.direction = 'backward';
-
-  if (state.currentQuestion > 0) {
-    state.currentQuestion--;
-    transitionTo(renderQuestion);
-  } else if (state.currentPart > 0) {
-    state.currentPart--;
-    state.currentQuestion = QUESTIONS.parts[state.currentPart].questions.length - 1;
-    transitionTo(renderQuestion);
-  }
-};
-
-// ===== PROGRESS =====
-function calculateProgress() {
-  const answered = Object.keys(state.answers).length;
-  return Math.min(Math.round((answered / QUESTIONS.total) * 100), 100);
 }
 
-function renderProgressBar(pct, partName) {
-  const partIndex = state.currentPart;
-  return `
-    <div class="progress-bar-wrap">
-      <div class="progress-bar-track">
-        <div class="progress-bar-fill" style="width:${pct}%"></div>
-      </div>
-      <div class="progress-meta">
-        <div class="progress-brand">
-          <span class="progress-brand-dot"></span>
-          Vocacional
-        </div>
-        <div class="progress-info">
-          <span class="progress-part">${partName}</span>
-          <span class="progress-pct">${pct}%</span>
-        </div>
+function updateCounter(ta) {
+  const c = $('#counter');
+  if (c) c.textContent = `${ta.value.length} / ${ta.maxLength}`;
+  const b = $('#open-next');
+  if (b) b.firstChild.textContent = ta.value.trim() ? 'Continuar ' : 'Pular ';
+}
+
+function onInput(e) {
+  if (e.target.id === 'open-answer') {
+    const q = currentQuestion();
+    state.answers[q.id] = e.target.value;
+    updateCounter(e.target);
+    persist();
+  }
+  if (e.target.classList && e.target.classList.contains('invalid')) {
+    e.target.classList.remove('invalid');
+    const err = $('#err-' + e.target.id);
+    if (err) err.hidden = true;
+  }
+}
+
+function answer(value) {
+  const q = currentQuestion();
+  if (q.type !== 'likert') return;
+  state.answers[q.id] = value;
+  persist();
+  document.querySelectorAll('.opt').forEach((b) => {
+    const on = Number(b.dataset.value) === value;
+    b.classList.toggle('sel', on);
+    b.setAttribute('aria-checked', on ? 'true' : 'false');
+  });
+  clearTimeout(advanceTimer);
+  advanceTimer = setTimeout(() => {
+    if (state.screen === 'question' && currentQuestion() === q) next();
+  }, 260);
+}
+
+function next() {
+  const sec = currentSection();
+  if (state.qi < sec.questions.length - 1) {
+    state.qi++;
+    renderQuestion();
+  } else if (state.si < plan.sections.length - 1) {
+    state.si++;
+    state.qi = 0;
+    renderSectionIntro();
+  } else {
+    finish();
+  }
+}
+
+function prev() {
+  if (state.qi > 0) {
+    state.qi--;
+    renderQuestion();
+  } else if (state.si > 0) {
+    state.si--;
+    state.qi = currentSection().questions.length - 1;
+    renderQuestion();
+  } else {
+    renderSectionIntro();
+  }
+}
+
+function backFromSection() {
+  state.si--;
+  state.qi = currentSection().questions.length - 1;
+  renderQuestion();
+}
+
+function finish() {
+  state.screen = 'result';
+  state.endTime = new Date().toISOString();
+  persist();
+  renderResult();
+}
+
+/* ---------- resultado ---------- */
+function renderResult() {
+  state.screen = 'result';
+  plan = getPlan(state.tier);
+  const scores = Scoring.compute(plan, state.answers);
+  promptText = PromptBuilder.build(state, plan, scores);
+  const canShare = !!navigator.share && window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+
+  const bars = scores.riasec
+    ? [...scores.riasec]
+        .sort((a, b) => b.score - a.score)
+        .map(
+          (r) => `
+        <div class="bar">
+          <div class="bar-top"><span>${esc(r.nome)}</span><span class="bar-val">${r.score}</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:${r.score}%"></div></div>
+        </div>`
+        )
+        .join('')
+    : '';
+
+  const topValues = scores.valuesRank
+    ? scores.valuesRank
+        .slice(0, 3)
+        .map((v) => esc(v.nome))
+        .join(', ')
+    : '';
+
+  render(`
+    <div class="page fade">
+      <div class="brand">Teste Vocacional</div>
+
+      <div class="done-badge">${ICON.check}<span>Teste concluído</span></div>
+      <h1 class="h1">${esc(state.personal.nome)}, falta só um passo</h1>
+      <p class="lead">Suas respostas viraram um texto pronto. Ele vai para o ChatGPT, que faz a análise completa. Siga os 3 passos abaixo.</p>
+
+      <ol class="steps">
+        <li class="step" id="step-1">
+          <span class="step-n">1</span>
+          <div class="step-body">
+            <h2 class="step-title">Copie o texto</h2>
+            <p class="muted">Ele já tem as suas respostas e as instruções para o ChatGPT.</p>
+            <button class="btn btn-primary btn-block" id="btn-copy" data-action="copy">${ICON.copy}<span>Copiar texto para o ChatGPT</span></button>
+          </div>
+        </li>
+        <li class="step" id="step-2">
+          <span class="step-n">2</span>
+          <div class="step-body">
+            <h2 class="step-title">Abra o ChatGPT</h2>
+            <p class="muted">Funciona na versão gratuita, no navegador ou no aplicativo.</p>
+            <a class="btn btn-ghost btn-block" id="btn-open" href="${CHATGPT_URL}" target="_blank" rel="noopener noreferrer">${ICON.external}<span>Abrir o ChatGPT</span></a>
+          </div>
+        </li>
+        <li class="step" id="step-3">
+          <span class="step-n">3</span>
+          <div class="step-body">
+            <h2 class="step-title">Cole e envie</h2>
+            <p class="muted">Toque e segure no campo de mensagem, escolha <strong>Colar</strong> e envie. No computador, use Ctrl+V. Se a resposta parar no meio, escreva <em>continue</em>.</p>
+          </div>
+        </li>
+      </ol>
+
+      <p class="note" id="copy-msg" role="status" aria-live="polite"></p>
+
+      <details class="card details" id="prompt-details">
+        <summary>Ver o texto que será copiado</summary>
+        <textarea id="prompt-view" class="textarea mono" rows="12" readonly aria-label="Texto para o ChatGPT"></textarea>
+      </details>
+
+      ${
+        scores.riasec
+          ? `<section class="card">
+              <h2 class="h3">Seu retrato rápido</h2>
+              <p class="muted">Código de interesses (Holland): <strong>${esc(scores.code)}</strong>${topValues ? '. Valores que mais pesam: ' + topValues + '.' : '.'} A análise do ChatGPT aprofunda isso.</p>
+              <div class="bars">${bars}</div>
+            </section>`
+          : ''
+      }
+
+      <section class="card">
+        <h2 class="h3">Depois da primeira resposta, pergunte</h2>
+        <ul class="plain-list">
+          <li>"Compare as duas primeiras carreiras da lista para o meu caso."</li>
+          <li>"Monte um plano de estudos de 6 meses para a carreira número 1."</li>
+          <li>"Quais cursos e faculdades no Brasil levam a essa carreira?"</li>
+        </ul>
+        <p class="muted small">Outras IAs, como Claude e Gemini, também aceitam o mesmo texto.</p>
+      </section>
+
+      <div class="extras">
+        ${canShare ? '<button class="btn btn-ghost btn-block" data-action="share">Compartilhar o texto com outro app</button>' : ''}
+        <button class="btn btn-ghost btn-block" data-action="download-txt">Baixar o texto (.txt)</button>
+        <button class="btn btn-ghost btn-block" data-action="download-csv">Baixar respostas (.csv)</button>
+        <button class="btn btn-text btn-block" data-action="restart">Refazer o teste</button>
       </div>
     </div>
-  `;
+  `);
+  $('#prompt-view').value = promptText;
 }
 
-// ===== MOTIVATIONAL =====
-let motivationalIndex = 0;
-function showMotivational() {
-  setTimeout(() => {
-    const wrap = document.getElementById('question-wrap');
-    if (!wrap) return;
-    const existing = wrap.querySelector('.motivational-text');
-    if (existing) existing.remove();
-    const el = document.createElement('p');
-    el.className = 'motivational-text';
-    el.textContent = MOTIVATIONAL[motivationalIndex % MOTIVATIONAL.length];
-    motivationalIndex++;
-    wrap.appendChild(el);
-  }, 800);
+async function copyPrompt() {
+  const msg = $('#copy-msg');
+  const btn = $('#btn-copy');
+  let ok = false;
+  try {
+    await navigator.clipboard.writeText(promptText);
+    ok = true;
+  } catch (e) {
+    try {
+      const ta = $('#prompt-view');
+      $('#prompt-details').open = true;
+      ta.focus();
+      ta.select();
+      ta.setSelectionRange(0, ta.value.length);
+      ok = document.execCommand('copy');
+    } catch (e2) {
+      ok = false;
+    }
+  }
+  if (ok) {
+    btn.classList.add('done');
+    btn.querySelector('span').textContent = 'Texto copiado';
+    $('#step-1').classList.add('done');
+    $('#step-2').classList.add('active');
+    msg.textContent = 'Pronto! Agora toque em "Abrir o ChatGPT" e cole lá.';
+    msg.className = 'note ok';
+  } else {
+    $('#prompt-details').open = true;
+    const ta = $('#prompt-view');
+    ta.focus();
+    ta.select();
+    msg.textContent = 'Não consegui copiar sozinho. O texto está selecionado abaixo: toque nele, escolha Copiar e depois abra o ChatGPT.';
+    msg.className = 'note warn';
+  }
 }
 
-// ===== COMPLETE SCREEN =====
-function renderComplete(app) {
-  state.screen = 'complete';
-  Storage.save(state);
-
-  const answered = Object.keys(state.answers).length;
-  const startDate = new Date(state.startTime);
-  const duration = Math.round((Date.now() - startDate) / 60000);
-  const openAnswered = QUESTIONS.flat.filter(q => q.type === 'open' && state.answers[q.id]).length;
-
-  app.innerHTML = `
-    <div class="complete-screen stagger">
-      <div class="complete-icon">✅</div>
-      <h1 class="complete-headline">Você concluiu!<br><span style="color:#059669">Parabéns.</span></h1>
-      <p class="complete-subtitle">
-        Suas respostas foram registradas com cuidado. Agora elas podem ser analisadas para revelar seu perfil vocacional completo.
-      </p>
-      <div class="complete-stats">
-        <div class="complete-stat">
-          <div class="complete-stat-value">${answered}</div>
-          <div class="complete-stat-label">Respostas</div>
-        </div>
-        <div class="complete-stat">
-          <div class="complete-stat-value">${duration}min</div>
-          <div class="complete-stat-label">Duração</div>
-        </div>
-        <div class="complete-stat">
-          <div class="complete-stat-value">${QUESTIONS.parts.length}</div>
-          <div class="complete-stat-label">Etapas</div>
-        </div>
-      </div>
-      <div class="complete-actions">
-        <button class="btn-download" onclick="downloadCSV()">
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2v10M5 8l4 4 4-4M3 14h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Baixar resultados (CSV)
-        </button>
-        <p class="complete-note">
-          O arquivo CSV contém todas as suas ${answered} respostas organizadas e prontas para análise por IA ou especialista vocacional.
-        </p>
-        <button class="btn-secondary" onclick="startFreshComplete()" style="margin-top:8px">
-          Fazer o teste novamente
-        </button>
-      </div>
-    </div>
-  `;
-
-  Storage.clear();
+async function sharePrompt() {
+  try {
+    await navigator.share({ title: 'Meu teste vocacional', text: promptText });
+  } catch (e) {
+    /* usuário cancelou */
+  }
 }
 
-window.downloadCSV = function() {
-  Export.download(state);
-  showFeedback('CSV baixado com sucesso!');
-};
-
-window.startFreshComplete = function() {
+function restart() {
+  if (!confirm('Apagar as respostas e começar um novo teste?')) return;
   Storage.clear();
   Object.assign(state, {
     screen: 'intro',
-    currentPart: 0,
-    currentQuestion: 0,
-    showingPartIntro: false,
-    personalData: {},
+    si: 0,
+    qi: 0,
+    personal: {},
     answers: {},
     respondentId: null,
     startTime: null,
-    direction: 'forward',
+    endTime: null,
   });
-  transitionTo(renderIntro);
-};
-
-// ===== RIPPLE =====
-function addRipple(element) {
-  const ripple = document.createElement('span');
-  ripple.classList.add('ripple');
-  const rect = element.getBoundingClientRect();
-  const size = Math.max(rect.width, rect.height);
-  ripple.style.width = ripple.style.height = size + 'px';
-  ripple.style.left = (rect.width - size) / 2 + 'px';
-  ripple.style.top = (rect.height - size) / 2 + 'px';
-  element.appendChild(ripple);
-  setTimeout(() => ripple.remove(), 700);
+  renderIntro();
 }
 
-// ===== FEEDBACK TOAST =====
-function showFeedback(msg) {
-  let el = document.getElementById('answer-feedback');
-  if (!el) {
-    el = document.createElement('div');
-    el.id = 'answer-feedback';
-    el.className = 'answer-feedback';
-    document.body.appendChild(el);
+/* ---------- eventos ---------- */
+function onClick(e) {
+  const el = e.target.closest('[data-action]');
+  if (!el) return;
+  const a = el.dataset.action;
+
+  switch (a) {
+    case 'tier':
+      state.tier = el.dataset.tier;
+      document.querySelectorAll('.tier').forEach((t) => {
+        const on = t.dataset.tier === state.tier;
+        t.classList.toggle('sel', on);
+        t.setAttribute('aria-checked', on ? 'true' : 'false');
+      });
+      break;
+    case 'to-personal':
+      renderPersonal();
+      break;
+    case 'to-intro':
+      renderIntro();
+      break;
+    case 'submit-personal':
+      submitPersonal();
+      break;
+    case 'start-section':
+      renderQuestion();
+      break;
+    case 'back-from-section':
+      backFromSection();
+      break;
+    case 'answer':
+      answer(Number(el.dataset.value));
+      break;
+    case 'open-next':
+      next();
+      break;
+    case 'prev':
+      clearTimeout(advanceTimer);
+      prev();
+      break;
+    case 'copy':
+      copyPrompt();
+      break;
+    case 'share':
+      sharePrompt();
+      break;
+    case 'download-txt':
+      Export.download(promptText, Export.fileName(state, 'txt'), 'text/plain');
+      break;
+    case 'download-csv':
+      Export.download(Export.csv(state, plan), Export.fileName(state, 'csv'), 'text/csv');
+      break;
+    case 'restart':
+      restart();
+      break;
+    case 'resume': {
+      const saved = Storage.load();
+      restore(saved);
+      if (state.screen === 'result') renderResult();
+      else if (state.screen === 'question') renderQuestion();
+      else if (state.screen === 'section') renderSectionIntro();
+      else if (state.screen === 'personal') renderPersonal();
+      else renderQuestion();
+      break;
+    }
+    case 'fresh':
+      Storage.clear();
+      renderIntro();
+      break;
   }
-  el.textContent = msg;
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 2000);
 }
 
-// ===== KEYBOARD NAVIGATION =====
-function setupKeyboard() {
-  document.addEventListener('keydown', handleKeyboard);
-}
-
-function handleKeyboard(e) {
+function onKey(e) {
+  const tag = document.activeElement && document.activeElement.tagName;
+  if (e.key === 'Enter' && state.screen === 'personal' && (tag === 'INPUT' || tag === 'SELECT')) {
+    e.preventDefault();
+    submitPersonal();
+    return;
+  }
   if (state.screen !== 'question') return;
-
-  // Ignore when typing in textarea
-  if (document.activeElement && document.activeElement.tagName === 'TEXTAREA') return;
-  if (document.activeElement && document.activeElement.tagName === 'INPUT') return;
-
-  const part = QUESTIONS.parts[state.currentPart];
-  if (!part) return;
-  const question = part.questions[state.currentQuestion];
-  if (!question) return;
-
-  if (question.type === 'likert') {
-    if (e.key >= '1' && e.key <= '5') {
+  if (tag === 'TEXTAREA' || tag === 'INPUT') {
+    if (tag === 'TEXTAREA' && e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
       e.preventDefault();
-      handleLikert(parseInt(e.key));
+      next();
     }
-    if (e.key === 'ArrowRight' || e.key === 'Enter') {
-      e.preventDefault();
-      const btn = document.getElementById('btn-next');
-      if (btn && !btn.disabled) nextQuestion();
-    }
-    if (e.key === 'ArrowLeft') {
-      e.preventDefault();
-      prevQuestion();
-    }
-  } else {
-    if (e.key === 'Enter' && e.metaKey) {
-      e.preventDefault();
-      nextQuestion();
-    }
+    return;
   }
-}
-
-// ===== UTILS =====
-function escapeHtml(str) {
-  if (!str) return '';
-  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const q = currentQuestion();
+  if (q.type !== 'likert') return;
+  if (e.key >= '1' && e.key <= '5') {
+    e.preventDefault();
+    answer(Number(e.key));
+  } else if (e.key === 'ArrowLeft') {
+    e.preventDefault();
+    clearTimeout(advanceTimer);
+    prev();
+  } else if ((e.key === 'ArrowRight' || e.key === 'Enter') && state.answers[q.id]) {
+    e.preventDefault();
+    next();
+  }
 }
